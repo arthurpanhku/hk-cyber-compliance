@@ -114,6 +114,33 @@ HKCC.addSources({
     url: 'https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20260529-8-EN',
     status: 'current'
   },
+  'hkma-svf-guideline': {
+    regulator: 'HKMA',
+    titleEn: 'Guideline on Supervision of Stored Value Facility Licensees (G.N. 5043)',
+    titleZh: '《储值支付工具持牌人监管指引》（宪报公告第 5043 号）',
+    issued: '2016-09',
+    legalStatus: '金管专员根据《支付系统及储值支付工具条例》（第 584 章）第 54(1A)(b) 条发出的指引',
+    url: 'https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/Guidelines-on-supervision-of-SVF-licensees_Eng.pdf',
+    status: 'current'
+  },
+  'hkma-svf-pn': {
+    regulator: 'HKMA',
+    titleEn: 'Practice Note on Supervision of Stored Value Facility Licensees',
+    titleZh: '《储值支付工具持牌人监管实务备考》',
+    issued: '2025-10',
+    legalStatus: '金管局实务备考；说明《指引》原则在典型情况下的达标方式，不凌驾或取代条例与《指引》',
+    url: 'https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/PN_on_supervision_of_SVF_licensees_eng.pdf',
+    status: 'current'
+  },
+  'occics-cop-svf': {
+    regulator: 'HKMA',
+    titleEn: 'Code of Practice Pursuant to the Protection of Critical Infrastructures (Computer Systems) Ordinance (for Stored Value Facility Licensees designated by the Monetary Authority as Critical Infrastructure Operators)',
+    titleZh: '《保护关键基础设施（电脑系统）条例》实务守则（适用于金管专员指定为关键基础设施营运者的储值支付工具持牌人）',
+    issued: '2026-06-12',
+    legalStatus: '金管专员根据条例第 8(1)(b) 条发出的界别实务守则',
+    url: 'https://www.occics.gov.hk/filemanager/en/content_19/SCoP_SVF_Licensees_en.pdf',
+    status: 'current'
+  },
   'hkma-cop-ci': {
     regulator: 'HKMA',
     titleEn: 'Code of Practice Pursuant to the Protection of Critical Infrastructures (Computer Systems) Ordinance (for Authorized Institutions designated by the MA as Critical Infrastructure Operators)',

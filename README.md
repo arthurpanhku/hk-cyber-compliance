@@ -3,9 +3,9 @@
   <p><strong>按牌照与业务特征，生成香港监管机构的网络安全控制点要求</strong></p>
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
-    <img src="https://img.shields.io/badge/version-1.0.0-0ea5e9" alt="Version 1.0.0">
-    <img src="https://img.shields.io/badge/控制点-87-16a34a" alt="87 controls">
-    <img src="https://img.shields.io/badge/条文出处-17-64748B" alt="17 sources">
+    <img src="https://img.shields.io/badge/version-1.1.0-0ea5e9" alt="Version 1.1.0">
+    <img src="https://img.shields.io/badge/控制点-102-16a34a" alt="102 controls">
+    <img src="https://img.shields.io/badge/条文出处-20-64748B" alt="20 sources">
     <img src="https://img.shields.io/badge/零依赖-双击即用-7c3aed" alt="Zero dependency">
     <img src="https://img.shields.io/badge/条文核验-2026--09--08-64748B" alt="Verified 2026-09-08">
   </p>
@@ -52,7 +52,7 @@ git clone https://github.com/arthurpanhku/hk-cyber-compliance-assistant.git
 
 ## 覆盖范围
 
-v1.0.0 共 **87 条控制点**，来自 **17 份**官方文件（全部链接与日期于 2026-09-08 经官网核验）：
+v1.1.0 共 **102 条控制点**，来自 **20 份**官方文件（全部链接与日期于 2026-09-08 经官网核验）：
 
 ### 证监会 SFC（42 条）
 
@@ -63,7 +63,7 @@ v1.0.0 共 **87 条控制点**，来自 **17 份**官方文件（全部链接与
 | [通函 26EC32：应对 AI 驱动网络攻击](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC32) | 2026-06-02 | 资产清单、加速补丁、最小权限、微分段、不可信输入处理 |
 | 《操守准则》第 18 段及附表 7 | — | 互联网交易的上位规定 |
 
-### 金管局 HKMA（24 条）
+### 金管局 HKMA — 认可机构（24 条）
 
 | 文件 | 日期 | 说明 |
 | --- | --- | --- |
@@ -74,6 +74,14 @@ v1.0.0 共 **87 条控制点**，来自 **17 份**官方文件（全部链接与
 | [SPM SA-2 外判](https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/SA-2) | 2001-12-28 | |
 | [通函：网络安全强化计划 2.0（C-RAF 2.0）](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20201103-1-EN) | 2020-11-03 | 固有风险评估、成熟度评估、iCAST |
 | [通函：AI 驱动网络威胁下的网络韧性](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20260529-8-EN) | 2026-06-02 | |
+
+### 金管局 HKMA — 储值支付工具持牌人（15 条）
+
+| 文件 | 日期 | 说明 |
+| --- | --- | --- |
+| [储值支付工具持牌人监管指引（G.N. 5043）](https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/Guidelines-on-supervision-of-SVF-licensees_Eng.pdf) | 2016-09 | 《支付系统及储值支付工具条例》第 54(1A)(b) 条；第 7.2／7.3／7.4 节的科技风险、支付保安与业务连续性要求 |
+| [储值支付工具持牌人监管实务备考](https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/PN_on_supervision_of_SVF_licensees_eng.pdf) | 2025-10 | 逐段说明达标方式，含反诈骗要求：**讯息不得嵌入超连结** |
+| [SVF 界别关键基础设施实务守则](https://www.occics.gov.hk/filemanager/en/content_19/SCoP_SVF_Licensees_en.pdf) | 2026-06-12 | 适用于被指定为 CI 营运者的 SVF 持牌人 |
 
 ### 关键基础设施（13 条）
 
@@ -107,7 +115,7 @@ v1.0.0 共 **87 条控制点**，来自 **17 份**官方文件（全部链接与
 例如把「每日离线备份」和「在严重情景下测试关键业务交付能力」合并，或把强制的 12 小时法定事故通报
 与《私隐条例》下的自愿通报合并。两者性质不同，合并会造成合规误读。
 
-在同时持有 SFC 牌照与 HKMA 认可机构身份、且勾选全部业务特征的最大范围下，87 条条文合并为 **67 项**独立要求。
+在勾选全部牌照与业务特征的最大范围下，102 条条文合并为 **82 项**独立要求。
 
 ## 数据结构
 
@@ -120,6 +128,7 @@ data/
     ├── sfc-internet-trading.js    SFC 黑客风险指引 20 项 + 操守准则
     ├── sfc-circulars-2026.js      SFC 2026 年两份通函
     ├── hkma.js                    TM-G-1 / TM-E-1 / TM-C-1 / OR-2 / SA-2 / C-RAF
+    ├── svf.js                     储值支付工具指引与实务备考
     ├── pdpo.js                    六项保障资料原则
     └── critical-infrastructure.js 关键基础设施条例三类责任
 ```
@@ -141,6 +150,12 @@ data/
   crossRefs: ['SFC-PH-A1', 'HKMA-TME1-4.1']
 }
 ```
+
+## 已知缺口
+
+**保险业监管局（IA）的网络安全指引尚未纳入。** `ia.org.hk` 全站启用了 Cloudflare 机器人验证，
+自动化工具无法取得原文 PDF。本项目不接受凭记忆撰写的条文，因此在取得官方原文前不会加入 IA 相关控制点，
+牌照选项中亦暂未列出保险中介人／授权保险人。欢迎以 PR 形式补充（请附官方 PDF 出处与条款编号）。
 
 ## 贡献
 

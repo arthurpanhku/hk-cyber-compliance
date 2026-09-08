@@ -112,7 +112,7 @@
       title: '银行界：须同时参照金管专员发出的界别实务守则',
       requirement: '获金管专员指定为关键基础设施营运者的认可机构，就第 1 类及第 2 类责任须参照金管专员发出的界别实务守则（2026-06-02）；就第 3 类责任则参照专员发出的通用实务守则第 7 节。',
       quote: 'A Designated AI should refer to guidance published by the Commissioner in relation to category 3 obligations, which can be found in section 7 of the Code of Practice (Generic) …',
-      applicability: { licenses: ['hkma-ai', 'hkma-svf'], attributes: A }
+      applicability: { licenses: ['hkma-ai'], attributes: A }
     }
   ]);
 })();

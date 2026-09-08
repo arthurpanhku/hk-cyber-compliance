@@ -5,7 +5,6 @@
  */
 (function () {
   const AI_INST = ['hkma-ai'];
-  const AI_SVF = ['hkma-ai', 'hkma-svf'];
 
   HKCC.addControls([
     // ---- TM-G-1 科技风险管理一般原则 ----
@@ -172,7 +171,7 @@
       title: '外判安排的评估、合约与持续监控',
       requirement: '就外判安排进行风险评估、订立合约保障（包括金管局的查阅权）、保障客户资料机密性，并对服务提供者进行持续监控。',
       quote: 'SPM SA-2 Outsourcing',
-      applicability: { licenses: AI_SVF, attributes: ['outsourcing'] },
+      applicability: { licenses: AI_INST, attributes: ['outsourcing'] },
       crossRefs: ['SFC-IT-2.10', 'HKMA-TMG1-7']
     },
 
@@ -182,7 +181,7 @@
       title: '在 AI 驱动网络威胁下强化网络韧性',
       requirement: '按金管局 2026 年 6 月 2 日通函检讨并强化网络韧性安排，以应对由人工智能驱动的网络威胁。建议与证监会 26EC32 通函的控制要求（资产清单、加速补丁、最小权限、微分段、不可信输入处理、供应链、事故响应）并行落实。',
       quote: 'Strengthening Cyber Resilience amid Artificial Intelligence-Empowered Cyber Threats',
-      applicability: { licenses: AI_SVF, attributes: ['ai-models'] },
+      applicability: { licenses: AI_INST, attributes: ['ai-models'] },
       crossRefs: ['SFC-AI-INV', 'SFC-AI-B3']
     }
   ]);

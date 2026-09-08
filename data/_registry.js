@@ -5,7 +5,7 @@
  * 每个数据文件的内容仍是纯 JSON 对象，便于按文件审阅与提交 PR。
  */
 window.HKCC = {
-  meta: { version: '1.0.0', verifiedOn: '2026-09-08' },
+  meta: { version: '1.1.0', verifiedOn: '2026-09-08' },
   sources: {},
   licenses: [],
   attributes: [],
