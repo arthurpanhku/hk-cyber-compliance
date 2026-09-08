@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>香港网络安全合规助手</title>
+<meta name="description" content="按牌照与业务特征生成 SFC、HKMA、PCPD 及关键基础设施条例的网络安全控制点要求，每条均标注官方条文出处。">
+<link rel="stylesheet" href="css/app.css">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <h1>香港网络安全合规助手</h1>
+    <span class="sub" id="version"></span>
+  </div>
+  <div class="header-actions">
+    <button id="export">导出 CSV</button>
+    <button id="print">打印 / 存为 PDF</button>
+    <button id="reset">重置</button>
+    <button id="theme" title="切换浅色 / 深色 / 跟随系统">主题</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="panel sidebar" id="sidebar"></aside>
+
+  <main>
+    <div class="print-header">
+      <h1>香港网络安全合规控制点清单</h1>
+      <p id="ph-scope"></p>
+      <p id="ph-attrs"></p>
+      <p id="ph-date"></p>
+    </div>
+
+    <div class="panel summary" id="summary"></div>
+
+    <div class="panel toolbar">
+      <input type="search" id="q" placeholder="搜索控制点、条文或关键词…" aria-label="搜索控制点">
+      <label class="inline"><input type="checkbox" id="merge"> 合并跨监管重复项</label>
+      <label class="inline"><input type="checkbox" id="gaps"> 只看未完成</label>
+    </div>
+
+    <div id="results"></div>
+  </main>
+</div>
+
+<footer class="disclaimer">
+  <p><strong>免责声明：</strong>本工具为开源参考工具，不构成法律或合规意见。所列控制点为对公开监管条文的结构化整理，
+  不能取代对条文原文的阅读，亦不能取代具备资格的法律或合规专业人士的判断。
+  监管要求会持续更新，请以各监管机构官方网站发布的最新版本为准。</p>
+  <p><strong>关于条文语言：</strong>控制点说明以中文撰写以便阅读，条文引述保留英文原文并附官方链接。
+  如中文说明与英文原文有任何出入，概以监管机构发布的原文为准。</p>
+</footer>
+
+<script src="data/_registry.js"></script>
+<script src="data/sources.js"></script>
+<script src="data/taxonomy.js"></script>
+<script src="data/controls/sfc-internet-trading.js"></script>
+<script src="data/controls/sfc-circulars-2026.js"></script>
+<script src="data/controls/hkma.js"></script>
+<script src="data/controls/pdpo.js"></script>
+<script src="data/controls/critical-infrastructure.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
