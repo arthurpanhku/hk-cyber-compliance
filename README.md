@@ -117,12 +117,16 @@ v1.1.0 共 **102 条控制点**，来自 **20 份**官方文件（全部链接�
 
 在勾选全部牌照与业务特征的最大范围下，102 条条文合并为 **82 项**独立要求。
 
+> **部署注意**：仓库根目录的 `.nojekyll` 不可删除。GitHub Pages 默认以 Jekyll 处理站点，
+> 而 Jekyll 会忽略以下划线开头的路径，导致 `data/_registry.js` 返回 404、整个应用无法启动。
+
 ## 数据结构
 
 ```
+.nojekyll                 关闭 GitHub Pages 的 Jekyll 处理（必需，勿删）
 data/
 ├── _registry.js          全局注册表
-├── sources.js            17 份条文出处（标题、日期、法律地位、官方链接）
+├── sources.js            20 份条文出处（标题、日期、法律地位、官方链接）
 ├── taxonomy.js           14 种牌照 · 6 项业务特征 · 10 个控制域
 └── controls/
     ├── sfc-internet-trading.js    SFC 黑客风险指引 20 项 + 操守准则
