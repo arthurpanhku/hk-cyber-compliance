@@ -30,7 +30,7 @@
 不需要安装任何东西，也不需要构建步骤：
 
 ```bash
-git clone https://github.com/arthurpanhku/hk-cyber-compliance-assistant.git
+git clone https://github.com/arthurpanhku/hk-cyber-compliance.git
 ```
 
 然后**双击 `index.html`** 即可在浏览器中使用。数据以 `.js` 形式加载而非 `.json`，正是为了让本地
