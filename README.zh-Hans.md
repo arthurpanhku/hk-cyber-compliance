@@ -9,8 +9,9 @@
     <a href="README.zh-Hant.md">繁體</a> · <strong>简体</strong> · <a href="README.md">English</a>
   </p>
   <p>
+    <a href="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml"><img src="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
-    <img src="https://img.shields.io/badge/version-1.2.0-0ea5e9" alt="Version 1.2.0">
+    <img src="https://img.shields.io/badge/version-1.3.0-0ea5e9" alt="Version 1.3.0">
     <img src="https://img.shields.io/badge/控制点-102-16a34a" alt="102 controls">
     <img src="https://img.shields.io/badge/条文出处-20-64748B" alt="20 sources">
     <img src="https://img.shields.io/badge/语言-EN%20%C2%B7%20%E7%B9%81%20%C2%B7%20%E7%AE%80-7c3aed" alt="Three languages">
@@ -61,7 +62,10 @@ git clone https://github.com/arthurpanhku/hk-cyber-compliance.git
 
 ## 覆盖范围
 
-v1.2.0 共 **102 条控制点**，来自 **20 份**官方文件（全部链接与日期于 2026-09-08 经官网核验）：
+v1.3.0 共 **102 条控制点**，来自 **20 份**官方文件。每份出处各有自己的 `verifiedOn`——
+最近一次实际打开官网核对链接与版本的日期。条文发布跨 2001 至 2026 年、复核节奏各不相同，
+用一个全局日期会让刚复核过的和多年没碰的看起来一样新。页首显示的是其中**最早**的一个，
+即以最弱的一环为准；另有每周自动巡检全部链接的工作流。
 
 ### 证监会 SFC（42 条）
 
@@ -212,9 +216,19 @@ data/
 node tools/validate.mjs
 ```
 
-校验项包括：ID 唯一、出处存在、控制域／牌照／业务特征有效、交叉引用可解析、必填字段齐全，
-**以及英文层与繁体层是否完整**——新增控制点若未补译，校验会失败。
-详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+校验项包括：ID 唯一、出处存在、控制域／牌照／业务特征有效、交叉引用可解析、必填字段齐全、
+每份出处都有 `verifiedOn`，**以及英文层与繁体层是否完整**——新增控制点若未补译，校验会失败。
+超过 180 天未复核的出处会出现提示。
+
+`.github/workflows/ci.yml` 会在每个 PR 上自动运行以上校验，并确认繁体生成物是最新的。
+另有每周一次的链接巡检：
+
+```bash
+node tools/check-links.mjs
+```
+
+只有确定失效（404／410／域名解析不了）才会失败；403／429 多为机器人防护，5xx 与超时多为暂时性
+故障，只报告不失败——长期红着的检查很快就没人看了。详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 授权
 

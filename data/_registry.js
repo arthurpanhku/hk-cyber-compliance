@@ -8,7 +8,7 @@
  * 注入 HKCC.i18n。查字段一律走 HKCC.tr()／HKCC.t()，不要直接读 obj.label。
  */
 window.HKCC = {
-  meta: { version: '1.2.0', verifiedOn: '2026-09-08' },
+  meta: { version: '1.3.0' },
 
   /** 基础数据的撰写语言：这些字段本身即 zh-Hans，无需覆盖层。 */
   baseLocale: 'zh-Hans',
@@ -35,6 +35,21 @@ window.HKCC = {
   addAttributes(arr) { this.attributes.push(...arr); },
   addDomains(arr) { this.domains.push(...arr); },
   addControls(arr) { this.controls.push(...arr); },
+
+  /**
+   * 对外声称的核验日期取各出处中**最早**的一个。
+   * 条文发布年份跨 2001–2026，各份的复核节奏不同；以最弱的一环为准，
+   * 才不会因为刚复核过一份就让整份清单显得比实际新。
+   */
+  verifiedOn() {
+    const ds = Object.values(this.sources).map(s => s.verifiedOn).filter(Boolean).sort();
+    return ds[0] || '—';
+  },
+  /** 最近一次复核；与 verifiedOn() 之差即各出处的相对陈旧程度。 */
+  lastVerifiedOn() {
+    const ds = Object.values(this.sources).map(s => s.verifiedOn).filter(Boolean).sort();
+    return ds[ds.length - 1] || '—';
+  },
 
   addI18n(locale, obj) {
     const bucket = this.i18n[locale] || (this.i18n[locale] = {});

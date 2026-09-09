@@ -57,6 +57,9 @@ HKCC.addI18n('en', {
     statusNa: 'N/A',
     statusUnrated: 'Unrated',
 
+    sourceMetaTip: 'Issued {issued}　·　source verified {verified}',
+    verifiedRangeTip: 'Sources were verified between {from} and {to}; the earliest is shown.',
+
     phScope: 'Licence scope: ',
     phAttrs: 'Business characteristics: ',
     phNone: '(none selected)',
@@ -72,6 +75,7 @@ HKCC.addI18n('en', {
     csvSource: 'Source',
     csvClause: 'Clause',
     csvIssued: 'Issued',
+    csvVerified: 'Source verified',
     csvDeadline: 'Deadline',
     csvUrl: 'Official link',
     csvQuote: 'Official text',

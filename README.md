@@ -9,8 +9,9 @@
     <a href="README.zh-Hant.md">繁體</a> · <a href="README.zh-Hans.md">简体</a> · <strong>English</strong>
   </p>
   <p>
+    <a href="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml"><img src="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
-    <img src="https://img.shields.io/badge/version-1.2.0-0ea5e9" alt="Version 1.2.0">
+    <img src="https://img.shields.io/badge/version-1.3.0-0ea5e9" alt="Version 1.3.0">
     <img src="https://img.shields.io/badge/controls-102-16a34a" alt="102 controls">
     <img src="https://img.shields.io/badge/sources-20-64748B" alt="20 sources">
     <img src="https://img.shields.io/badge/languages-EN%20%C2%B7%20%E7%B9%81%20%C2%B7%20%E7%AE%80-7c3aed" alt="Three languages">
@@ -66,8 +67,11 @@ It also deploys to GitHub Pages as-is (repository settings → Pages → publish
 
 ## Coverage
 
-v1.2.0 contains **102 controls** drawn from **20** official documents (all links and dates verified
-against the regulators' websites on 2026-09-08).
+v1.3.0 contains **102 controls** drawn from **20** official documents. Each source carries its own
+`verifiedOn` — the day its link and version were last checked against the regulator's website — because
+the documents span 2001 to 2026 and are re-checked at different times. The header shows the **earliest**
+of those dates, so the freshness claimed is the weakest link, never the most recently touched one. A
+scheduled workflow re-checks every link weekly.
 
 ### SFC (42 controls)
 
@@ -230,8 +234,20 @@ node tools/validate.mjs
 ```
 
 It checks that IDs are unique, sources exist, domains / licences / characteristics are valid, cross
-references resolve, required fields are present, **and that the English and Traditional layers are complete**
-— a control added without its translations fails the build. See [CONTRIBUTING.md](CONTRIBUTING.md).
+references resolve, required fields are present, every source has a `verifiedOn`, **and that the English
+and Traditional layers are complete** — a control added without its translations fails the build. Sources
+unchecked for more than 180 days raise a warning.
+
+`.github/workflows/ci.yml` runs this on every pull request, and also confirms the generated Traditional
+files are up to date. A separate weekly workflow re-checks all 20 source links:
+
+```bash
+node tools/check-links.mjs
+```
+
+It fails only on a definite 404 / 410 / DNS failure; 403 and 429 are usually bot protection and 5xx or
+timeouts are usually transient, so those are reported without failing — a permanently red check gets
+ignored. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 

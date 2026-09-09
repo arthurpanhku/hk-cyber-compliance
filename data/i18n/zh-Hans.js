@@ -51,6 +51,9 @@ HKCC.addI18n('zh-Hans', {
     statusNa: '不适用',
     statusUnrated: '未评估',
 
+    sourceMetaTip: '发布日期 {issued}　·　条文核验于 {verified}',
+    verifiedRangeTip: '各出处的核验日期介乎 {from} 至 {to}；此处显示最早的一个。',
+
     phScope: '牌照范围：',
     phAttrs: '业务特征：',
     phNone: '（未选择）',
@@ -66,6 +69,7 @@ HKCC.addI18n('zh-Hans', {
     csvSource: '出处',
     csvClause: '条款',
     csvIssued: '发布日期',
+    csvVerified: '条文核验日期',
     csvDeadline: '限期',
     csvUrl: '原文链接',
     csvQuote: '英文原文',

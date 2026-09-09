@@ -10,6 +10,7 @@ HKCC.addSources({
     issued: '2017-10-27',
     legalStatus: '根据《证券及期货条例》第 399 条发出的指引；不具法律效力，但违反其精神可能影响持牌人的适当人选资格',
     url: 'https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/guidelines-for-reducing-and-mitigating-hacking-risks-associated-with-internet-trading/guidelines-for-reducing-and-mitigating-hacking-risks-associated-with-internet-trading.pdf',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'sfc-cir-phishing-2026': {
@@ -20,6 +21,7 @@ HKCC.addSources({
     issued: '2026-07-09',
     legalStatus: '证监会通函，载列预期操守标准',
     url: 'https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC35',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'sfc-cir-ai-2026': {
@@ -30,6 +32,7 @@ HKCC.addSources({
     issued: '2026-06-02',
     legalStatus: '证监会通函，载列预期操守标准',
     url: 'https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC32',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'sfc-cir-mapping-2026': {
@@ -40,6 +43,7 @@ HKCC.addSources({
     issued: '2026-07-29',
     legalStatus: '跨监管机构联合通函',
     url: 'https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC45',
+    verifiedOn: '2026-09-08',
     status: 'ref'
   },
   'sfc-code-of-conduct': {
@@ -49,6 +53,7 @@ HKCC.addSources({
     issued: '—',
     legalStatus: '操守准则；违反可影响适当人选资格并招致纪律行动',
     url: 'https://www.sfc.hk/en/Rules-and-standards/Codes-and-guidelines/Codes',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-tm-g-1': {
@@ -58,6 +63,7 @@ HKCC.addSources({
     issued: '2003-06-24',
     legalStatus: '金管专员以指导注释形式发出的非法定指引',
     url: 'https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/TM-G-1',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-tm-e-1': {
@@ -67,6 +73,7 @@ HKCC.addSources({
     issued: '2024-10-25',
     legalStatus: '根据《银行业条例》第 7(3) 条发出的法定指引',
     url: 'https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/TM-E-1',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-tm-c-1': {
@@ -76,6 +83,7 @@ HKCC.addSources({
     issued: '2024-11-29',
     legalStatus: '根据《银行业条例》第 7(3) 条发出的法定指引；取代 2015-09-15《网络安全风险管理》通函',
     url: 'https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20241202-2-EN',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-or-2': {
@@ -85,6 +93,7 @@ HKCC.addSources({
     issued: '2022-05-31',
     legalStatus: '金管专员以指导注释形式发出的非法定指引',
     url: 'https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/OR-2',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-sa-2': {
@@ -94,6 +103,7 @@ HKCC.addSources({
     issued: '2001-12-28',
     legalStatus: '金管专员以指导注释形式发出的非法定指引',
     url: 'https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/SA-2',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-cfi-2': {
@@ -103,6 +113,7 @@ HKCC.addSources({
     issued: '2020-11-03',
     legalStatus: '金管局通函；C-RAF 评估为认可机构的持续监管要求',
     url: 'https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20201103-1-EN',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-cir-ai-2026': {
@@ -112,6 +123,7 @@ HKCC.addSources({
     issued: '2026-06-02',
     legalStatus: '金管局通函',
     url: 'https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20260529-8-EN',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-svf-guideline': {
@@ -121,6 +133,7 @@ HKCC.addSources({
     issued: '2016-09',
     legalStatus: '金管专员根据《支付系统及储值支付工具条例》（第 584 章）第 54(1A)(b) 条发出的指引',
     url: 'https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/Guidelines-on-supervision-of-SVF-licensees_Eng.pdf',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-svf-pn': {
@@ -130,6 +143,7 @@ HKCC.addSources({
     issued: '2025-10',
     legalStatus: '金管局实务备考；说明《指引》原则在典型情况下的达标方式，不凌驾或取代条例与《指引》',
     url: 'https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/PN_on_supervision_of_SVF_licensees_eng.pdf',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'occics-cop-svf': {
@@ -139,6 +153,7 @@ HKCC.addSources({
     issued: '2026-06-12',
     legalStatus: '金管专员根据条例第 8(1)(b) 条发出的界别实务守则',
     url: 'https://www.occics.gov.hk/filemanager/en/content_19/SCoP_SVF_Licensees_en.pdf',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'hkma-cop-ci': {
@@ -148,6 +163,7 @@ HKCC.addSources({
     issued: '2026-06-02',
     legalStatus: '金管专员根据条例第 8(1)(b) 条发出的界别实务守则',
     url: 'https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20260527-25-EN',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'occics-cop': {
@@ -157,6 +173,7 @@ HKCC.addSources({
     issued: '2026-01-01',
     legalStatus: '专员根据条例第 8 条发出的实务守则；本身非附属法例，但专员可就不遵从发出书面指示，不遵从指示即属犯罪',
     url: 'https://www.occics.gov.hk/filemanager/en/content_19/CoP_en_v1.0.pdf',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'occics-index': {
@@ -166,6 +183,7 @@ HKCC.addSources({
     issued: '2026-06-22',
     legalStatus: '官方索引页',
     url: 'https://www.occics.gov.hk/en/industry/code-of-practice/index.html',
+    verifiedOn: '2026-09-08',
     status: 'ref'
   },
   'pdpo': {
@@ -175,6 +193,7 @@ HKCC.addSources({
     issued: '—',
     legalStatus: '法例；DPP4 资料保安原则对所有资料使用者具约束力',
     url: 'https://www.pcpd.org.hk/english/data_privacy_law/6_data_protection_principles/principles.html',
+    verifiedOn: '2026-09-08',
     status: 'current'
   },
   'sfc-vatp-guidelines': {
@@ -184,6 +203,7 @@ HKCC.addSources({
     issued: '—',
     legalStatus: '证监会指引',
     url: 'https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/Guidelines-for-Virtual-Asset-Trading-Platform-Operators/Guidelines-for-Virtual-Asset-Trading-Platform-Operators.pdf',
+    verifiedOn: '2026-09-08',
     status: 'ref'
   }
 });

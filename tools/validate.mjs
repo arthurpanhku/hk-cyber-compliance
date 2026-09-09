@@ -64,10 +64,32 @@ for (const c of HKCC.controls) {
     if (!controlIds.has(r)) errors.push(`控制点 ${c.id}: 交叉引用指向不存在的控制点 "${r}"`);
   }
 }
+/* ---------- 出处：链接与核验日期 ----------
+   工具的立身之本是「条文现行有效」，所以每份出处都要有自己的核验日期：
+   条文发布跨 2001–2026，用一个全局日期会让刚复核过的和多年没碰的看起来一样新。 */
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const today = new Date().toISOString().slice(0, 10);
+const STALE_DAYS = 180;
+const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+
 for (const [id, s] of Object.entries(HKCC.sources)) {
   if (!s.url?.startsWith('http')) errors.push(`出处 ${id}: url 无效`);
   if (!HKCC.controls.some(c => c.sourceId === id) && s.status !== 'ref') {
     warn.push(`出处 ${id}: 没有任何控制点引用`);
+  }
+  if (!s.verifiedOn) {
+    errors.push(`出处 ${id}: 缺少 verifiedOn（每份出处须各自记录官网复核日期）`);
+  } else if (!DATE.test(s.verifiedOn)) {
+    errors.push(`出处 ${id}: verifiedOn 格式须为 YYYY-MM-DD`);
+  } else {
+    if (s.verifiedOn > today) errors.push(`出处 ${id}: verifiedOn ${s.verifiedOn} 在未来`);
+    if (DATE.test(s.issued) && s.verifiedOn < s.issued) {
+      errors.push(`出处 ${id}: verifiedOn ${s.verifiedOn} 早于发布日期 ${s.issued}`);
+    }
+    const age = daysBetween(s.verifiedOn, today);
+    if (age > STALE_DAYS) {
+      warn.push(`出处 ${id}: 已 ${age} 天未复核（上次 ${s.verifiedOn}）——请到官网确认链接与版本后更新 verifiedOn`);
+    }
   }
 }
 
@@ -118,8 +140,13 @@ for (const c of HKCC.controls) {
   byRegulator[r] = (byRegulator[r] || 0) + 1;
 }
 
+const verified = Object.values(HKCC.sources).map(s => s.verifiedOn).filter(Boolean).sort();
+const span = verified.length && verified[0] !== verified.at(-1)
+  ? `${verified[0]} ~ ${verified.at(-1)}` : (verified[0] ?? '—');
+
 console.log(`控制点 ${HKCC.controls.length} · 出处 ${sourceIds.size} · 牌照 ${licenseIds.size} · 业务特征 ${attrIds.size} · 控制域 ${domainIds.size}`);
 console.log('按监管机构:', byRegulator);
+console.log(`条文核验日期: ${span}`);
 if (warn.length) console.log(`\n提示 (${warn.length}):\n  ` + warn.join('\n  '));
 if (errors.length) {
   console.error(`\n错误 (${errors.length}):\n  ` + errors.join('\n  '));
