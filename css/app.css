@@ -48,8 +48,8 @@
 * { box-sizing: border-box; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
-  font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-        "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+        "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 a { color: var(--accent); }
@@ -101,6 +101,15 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .opt-text { min-width: 0; }
 .opt-label { font-size: 13.5px; }
 .opt-note { font-size: 11.5px; color: var(--text-faint); line-height: 1.45; margin-top: 1px; }
+.project-fields { padding-bottom: 2px; border-bottom: 1px solid var(--border); }
+.stacked-field, .record-field { display: flex; flex-direction: column; gap: 4px;
+  font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
+.stacked-field input, .record-field input, .record-field textarea,
+.toolbar select {
+  width: 100%; font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 7px;
+  border: 1px solid var(--border-strong); background: var(--bg); color: var(--text);
+}
+.record-field textarea { min-height: 70px; resize: vertical; line-height: 1.45; }
 
 /* ---------- 摘要 ---------- */
 .summary { padding: 14px 16px; margin-bottom: 16px; }
@@ -108,6 +117,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .summary-count { font-size: 26px; font-weight: 650; letter-spacing: -.02em; }
 .summary-label { color: var(--text-dim); font-size: 13.5px; }
 .summary-note { font-size: 12.5px; color: var(--text-faint); margin-top: 4px; }
+.storage-warning { margin-top: 10px; padding: 8px 10px; border-radius: 7px;
+  background: var(--partial-soft); color: var(--partial); font-size: 12.5px; }
 .by-reg { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 11px; }
 
 .progress-wrap { margin-top: 14px; }
@@ -119,6 +130,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .progress i.done { background: var(--ok); }
 .progress i.partial { background: var(--partial); }
 .progress i.gap { background: var(--gap); }
+.score-note { margin-top: 6px; color: var(--text-faint); font-size: 11.5px; }
 
 /* ---------- 工具条 ---------- */
 .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
@@ -128,6 +140,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   border: 1px solid var(--border-strong); background: var(--bg); color: var(--text);
   min-width: 190px; flex: 1 1 190px;
 }
+.toolbar select { width: auto; min-width: 150px; }
 .toolbar label.inline { display: flex; align-items: center; gap: 6px;
   font-size: 13px; color: var(--text-dim); cursor: pointer; white-space: nowrap; }
 .toolbar label.inline input { accent-color: var(--accent); cursor: pointer; }
@@ -144,6 +157,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .control-ids { font-family: var(--mono); font-size: 11px; color: var(--text-faint);
   margin-top: 3px; word-break: break-all; }
 .control-req { margin: 10px 0 0; font-size: 13.5px; color: var(--text-dim); }
+.control-head > .tag { margin-left: auto; flex: none; }
+.control-note { margin: 9px 0 0; color: var(--text-faint); font-size: 11.5px; }
 
 details.quote { margin-top: 10px; }
 details.quote > summary { font-size: 12.5px; color: var(--accent); cursor: pointer;
@@ -151,6 +166,8 @@ details.quote > summary { font-size: 12.5px; color: var(--accent); cursor: point
 details.quote > summary::-webkit-details-marker { display: none; }
 details.quote > summary::before { content: "▸"; font-size: 10px; }
 details.quote[open] > summary::before { content: "▾"; }
+.quote-kind { margin-top: 9px; color: var(--text-faint); font-size: 11px;
+  text-transform: uppercase; letter-spacing: .04em; }
 blockquote { margin: 8px 0 0; padding: 9px 13px; border-left: 3px solid var(--border-strong);
   background: var(--surface-2); border-radius: 0 6px 6px 0;
   font-size: 12.5px; line-height: 1.6; color: var(--text-dim);
@@ -174,21 +191,41 @@ blockquote { margin: 8px 0 0; padding: 9px 13px; border-left: 3px solid var(--bo
 .tag.deadline { background: var(--gap-soft); color: var(--gap); border-color: transparent;
   font-weight: 600; }
 .tag.merged { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.tag.pending, .tag.overdue { background: var(--gap-soft); color: var(--gap); border-color: transparent; }
+.tag.complete { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.tag.due-soon { background: var(--partial-soft); color: var(--partial); border-color: transparent; }
 
 /* ---------- 自评 ---------- */
-.assess { display: flex; gap: 5px; margin-left: auto; flex: none; }
+.assessment-members { margin-top: 13px; border-top: 1px solid var(--border); }
+.assessment-member { padding: 11px 0; border-bottom: 1px solid var(--border); }
+.member-top { display: flex; gap: 10px; align-items: flex-start; }
+.member-top .source-line { flex: 1; min-width: 0; }
+.assess { display: flex; gap: 4px; margin-left: auto; flex: none; flex-wrap: wrap;
+  justify-content: flex-end; }
 .assess label { font-size: 11.5px; padding: 3px 9px; border-radius: 6px; cursor: pointer;
   border: 1px solid var(--border); color: var(--text-faint); white-space: nowrap;
   user-select: none; }
 .assess input { position: absolute; opacity: 0; pointer-events: none; }
 .assess label:hover { border-color: var(--border-strong); }
-.assess input:checked + span { display: none; }
 .assess label:has(input:checked) { font-weight: 600; }
+.assess label.s-none:has(input:checked) { background: var(--surface-2); color: var(--text-dim); }
 .assess label.s-done:has(input:checked) { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
 .assess label.s-partial:has(input:checked) { background: var(--partial-soft); color: var(--partial); border-color: transparent; }
 .assess label.s-gap:has(input:checked) { background: var(--gap-soft); color: var(--gap); border-color: transparent; }
 .assess label.s-na:has(input:checked) { background: var(--surface-2); color: var(--na); border-color: transparent; }
-@media (max-width: 620px) { .assess { margin-left: 0; width: 100%; margin-top: 9px; } }
+details.work-record { margin-top: 8px; }
+details.work-record > summary { color: var(--accent); font-size: 12px; cursor: pointer; }
+.record-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 180px 160px;
+  gap: 10px; margin-top: 10px; align-items: start; }
+.record-grid .record-field { margin: 0; }
+@media (max-width: 1000px) { .record-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px) {
+  .member-top { flex-direction: column; }
+  .assess { margin-left: 0; width: 100%; justify-content: flex-start; }
+  .record-grid { grid-template-columns: 1fr; }
+  .control-head { flex-wrap: wrap; }
+  .control-head > .tag { margin-left: 0; }
+}
 
 .empty { padding: 46px 22px; text-align: center; color: var(--text-faint); font-size: 14px; }
 .empty strong { display: block; color: var(--text-dim); font-size: 15px; margin-bottom: 6px; }
@@ -202,7 +239,7 @@ blockquote { margin: 8px 0 0; padding: 9px 13px; border-left: 3px solid var(--bo
   :root { --bg: #fff; --surface: #fff; --surface-2: #fff;
           --border: #bbb; --border-strong: #999; --text: #000;
           --text-dim: #333; --text-faint: #555; --shadow: none; }
-  .site-header, .sidebar, .toolbar, .header-actions { display: none !important; }
+  .site-header, .sidebar, .toolbar, .header-actions, details.work-record > summary { display: none !important; }
   .layout { display: block; max-width: none; padding: 0; }
   .panel { box-shadow: none; border-radius: 0; }
   .control { break-inside: avoid; page-break-inside: avoid;
@@ -211,6 +248,10 @@ blockquote { margin: 8px 0 0; padding: 9px 13px; border-left: 3px solid var(--bo
   details.quote[open] > summary { display: none; }
   details.quote:not([open]) { display: none; }
   .assess label:not(:has(input:checked)) { display: none; }
+  details.work-record { display: block; }
+  details.work-record > .record-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .record-field input, .record-field textarea { border: 0; padding: 0; background: transparent;
+    min-height: 0; resize: none; }
   a { color: #000; text-decoration: none; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9px; color: #666;
     word-break: break-all; }
