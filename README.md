@@ -1,5 +1,8 @@
 <div align="center">
-  <img src="assets/logo.svg" alt="香港网络安全合规助手" width="460">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <img src="assets/logo.svg" alt="香港网络安全合规助手" width="374">
+  </picture>
   <p><strong>按牌照与业务特征，生成香港监管机构的网络安全控制点要求</strong></p>
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
