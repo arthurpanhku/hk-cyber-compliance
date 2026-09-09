@@ -8,12 +8,17 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const HKCC = {
-  sources: {}, licenses: [], attributes: [], domains: [], controls: [],
+  baseLocale: 'zh-Hans',
+  sources: {}, licenses: [], attributes: [], domains: [], controls: [], i18n: {},
   addSources(o) { Object.assign(this.sources, o); },
   addLicenses(a) { this.licenses.push(...a); },
   addAttributes(a) { this.attributes.push(...a); },
   addDomains(a) { this.domains.push(...a); },
-  addControls(a) { this.controls.push(...a); }
+  addControls(a) { this.controls.push(...a); },
+  addI18n(loc, obj) {
+    const b = this.i18n[loc] || (this.i18n[loc] = {});
+    for (const [k, v] of Object.entries(obj)) Object.assign(b[k] || (b[k] = {}), v);
+  }
 };
 globalThis.HKCC = HKCC;
 globalThis.window = { HKCC };
@@ -23,6 +28,9 @@ load('data/sources.js');
 load('data/taxonomy.js');
 for (const f of readdirSync(join(root, 'data/controls')).filter(f => f.endsWith('.js')).sort()) {
   load(join('data/controls', f));
+}
+for (const f of readdirSync(join(root, 'data/i18n')).filter(f => f.endsWith('.js')).sort()) {
+  load(join('data/i18n', f));
 }
 
 const errors = [];
@@ -60,6 +68,47 @@ for (const [id, s] of Object.entries(HKCC.sources)) {
   if (!s.url?.startsWith('http')) errors.push(`出处 ${id}: url 无效`);
   if (!HKCC.controls.some(c => c.sourceId === id) && s.status !== 'ref') {
     warn.push(`出处 ${id}: 没有任何控制点引用`);
+  }
+}
+
+/* ---------- 多语言完整性 ----------
+   基础数据即 zh-Hans，故只校验其余语言的覆盖层。
+   漏译不会让页面出错（会回落到简体），但会让界面中英混杂，故列为错误。 */
+const TRANSLATED = ['en', 'zh-Hant'];
+const uiKeys = Object.keys(HKCC.i18n[HKCC.baseLocale]?.ui ?? {});
+if (!uiKeys.length) errors.push('缺少 data/i18n/zh-Hans.js 的 ui 字符串表');
+
+for (const loc of TRANSLATED) {
+  const bucket = HKCC.i18n[loc];
+  if (!bucket) { errors.push(`缺少语言层 "${loc}"`); continue; }
+
+  const missingUi = uiKeys.filter(k => !bucket.ui?.[k]);
+  if (missingUi.length) errors.push(`${loc}: 界面字符串缺 ${missingUi.length} 条 — ${missingUi.join(', ')}`);
+  const extraUi = Object.keys(bucket.ui ?? {}).filter(k => !uiKeys.includes(k));
+  if (extraUi.length) warn.push(`${loc}: 界面字符串多出 ${extraUi.join(', ')}（简体已删除？）`);
+
+  const missingCtl = HKCC.controls.filter(c => {
+    const o = bucket.controls?.[c.id];
+    return !o || !o.title || !o.requirement;
+  }).map(c => c.id);
+  if (missingCtl.length) {
+    errors.push(`${loc}: ${missingCtl.length} 条控制点缺 title/requirement — ${missingCtl.join(', ')}`);
+  }
+  const staleCtl = Object.keys(bucket.controls ?? {}).filter(id => !controlIds.has(id));
+  if (staleCtl.length) warn.push(`${loc}: 译文指向已删除的控制点 ${staleCtl.join(', ')}`);
+
+  // 有 note 的控制点，译文也须有 note，否则中英混排。
+  const missingNote = HKCC.controls
+    .filter(c => c.note && !bucket.controls?.[c.id]?.note).map(c => c.id);
+  if (missingNote.length) errors.push(`${loc}: 控制点 note 未译 — ${missingNote.join(', ')}`);
+
+  for (const [kind, list, fields] of [
+    ['licenses', HKCC.licenses, ['label', 'group']],
+    ['attributes', HKCC.attributes, ['label']],
+    ['domains', HKCC.domains, ['label', 'desc']]
+  ]) {
+    const miss = list.filter(x => fields.some(f => !bucket[kind]?.[x.id]?.[f])).map(x => x.id);
+    if (miss.length) errors.push(`${loc}: ${kind} 缺译 — ${miss.join(', ')}`);
   }
 }
 

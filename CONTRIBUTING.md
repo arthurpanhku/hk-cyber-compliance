@@ -19,11 +19,40 @@
 node tools/validate.mjs
 ```
 
-校验项：ID 唯一、出处存在、控制域／牌照／业务特征有效、交叉引用可解析、必填字段齐全、日期格式正确。
-校验不通过的 PR 不会合并。
+校验项：ID 唯一、出处存在、控制域／牌照／业务特征有效、交叉引用可解析、必填字段齐全、日期格式正确，
+**以及英文层与繁体层是否完整**。校验不通过的 PR 不会合并。
+
+若改动过任何中文文字，还须重新生成繁体层：
+
+```bash
+pip install opencc-python-reimplemented
+python3 tools/gen-hant.py
+```
 
 改动界面逻辑时请在浏览器中实测（双击 `index.html` 即可，不需要服务器）：
-至少验证「选择牌照 → 出现控制点 → 自评 → 导出 CSV」这条主路径。
+至少验证「选择牌照 → 出现控制点 → 自评 → 导出 CSV」这条主路径，
+并用 `index.html?lang=en`、`?lang=zh-Hant`、`?lang=zh-Hans` 各看一遍。
+
+## 多语言
+
+基础数据（`data/taxonomy.js`、`data/sources.js`、`data/controls/*.js`）一律以**简体中文**撰写，
+其余语言以覆盖层形式放在 `data/i18n/`：
+
+| 文件 | 维护方式 |
+| --- | --- |
+| `data/i18n/zh-Hans.js` | 手写。只有界面字符串——基础数据本身即简体 |
+| `data/i18n/en.js` | 手写。界面字符串 + 全部控制点的 `title` / `requirement`（及有值时的 `clause` / `note`） |
+| `data/i18n/zh-Hant.js` | **自动生成，请勿手改。** 由 `tools/gen-hant.py` 转换而来，手改会在下次生成时丢失 |
+| `README.zh-Hant.md` | **自动生成**，由 `README.zh-Hans.md` 转换而来 |
+
+几条规则：
+
+1. **`quote` 永不翻译。** 它是监管机构发布的英文原文，任何语言下都原样显示。
+2. **英文不是从中文翻译过来的。** SFC 通函、HKMA 监管政策手册与各实务守则本身即以英文发布，
+   `en.js` 应对照英文原始文件撰写，用词与读者在原文中看到的一致；不要把中文说明直译回英文。
+3. **新增控制点必须同时补 `en.js`。** 否则校验失败（繁体层由脚本生成，不需要手动补）。
+4. 繁体的个别字形若不合香港监管文件的写法，请改 `tools/gen-hant.py` 的 `OVERRIDES` 表并重新生成，
+   不要直接改生成结果。
 
 ## 关于交叉引用（`crossRefs`）
 
@@ -40,8 +69,11 @@ node tools/validate.mjs
 1. 在 `data/sources.js` 加入出处条目（含官方链接、发布日期、法律地位）
 2. 在 `data/controls/` 新建或扩充对应文件
 3. 在 `index.html` 的 `<script>` 列表中加入新文件
-4. 更新 `README.md` 的覆盖范围表格与徽章中的控制点数量
-5. 运行校验并在浏览器实测
+4. 在 `data/i18n/en.js` 补上新控制点的英文
+5. 运行 `python3 tools/gen-hant.py` 生成繁体层
+6. 更新 `README.md` 与 `README.zh-Hans.md` 的覆盖范围表格与徽章中的控制点数量
+   （`README.zh-Hant.md` 由脚本生成，不必手改）
+7. 运行校验并在浏览器实测
 
 ## 什么不适合提交
 

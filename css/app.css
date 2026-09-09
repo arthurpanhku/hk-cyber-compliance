@@ -52,6 +52,11 @@ body {
         "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+/* 繁体界面改用香港／台湾字形的字体，避免简体字体渲染繁体时字形不合。 */
+html[lang="zh-Hant"] body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang HK", "PingFang TC",
+    "Hiragino Sans CNS", "Microsoft JhengHei", "Noto Sans CJK HK", "Noto Sans CJK TC", sans-serif;
+}
 a { color: var(--accent); }
 
 /* ---------- 页头 ---------- */
@@ -74,6 +79,19 @@ button, .btn {
   color: var(--text); cursor: pointer; white-space: nowrap;
 }
 button:hover, .btn:hover { background: var(--surface-2); }
+
+/* ---------- 语言切换 ---------- */
+/* 分段按钮组：三个语言并排，当前语言高亮，避免额外占一行。 */
+.lang { display: inline-flex; align-items: stretch; }
+.lang .lang-btn {
+  border-radius: 0; margin-left: -1px; padding: 6px 10px; position: relative;
+}
+.lang .lang-btn:first-child { border-radius: 7px 0 0 7px; margin-left: 0; }
+.lang .lang-btn:last-child { border-radius: 0 7px 7px 0; }
+.lang .lang-btn.on {
+  background: var(--accent); border-color: var(--accent); color: #fff; z-index: 1;
+}
+.lang .lang-btn.on:hover { background: var(--accent); filter: brightness(1.08); }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 button.primary:hover { filter: brightness(1.08); }
 button:disabled { opacity: .45; cursor: not-allowed; }
