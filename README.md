@@ -1,177 +1,239 @@
 <div align="center">
-  <img src="assets/logo.svg" alt="香港网络安全合规助手" width="460">
-  <p><strong>按牌照与业务特征，生成香港监管机构的网络安全控制点要求</strong></p>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <img src="assets/logo.svg" alt="HK Cyber Compliance Assistant" width="374">
+  </picture>
+  <p><strong>Generate the cybersecurity controls Hong Kong regulators require of your firm, by licence and business profile</strong></p>
+  <p>
+    <!-- lang-nav -->
+    <a href="README.zh-Hant.md">繁體</a> · <a href="README.zh-Hans.md">简体</a> · <strong>English</strong>
+  </p>
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
-    <img src="https://img.shields.io/badge/version-1.1.0-0ea5e9" alt="Version 1.1.0">
-    <img src="https://img.shields.io/badge/控制点-102-16a34a" alt="102 controls">
-    <img src="https://img.shields.io/badge/条文出处-20-64748B" alt="20 sources">
-    <img src="https://img.shields.io/badge/零依赖-双击即用-7c3aed" alt="Zero dependency">
-    <img src="https://img.shields.io/badge/条文核验-2026--09--08-64748B" alt="Verified 2026-09-08">
+    <img src="https://img.shields.io/badge/version-1.2.0-0ea5e9" alt="Version 1.2.0">
+    <img src="https://img.shields.io/badge/controls-102-16a34a" alt="102 controls">
+    <img src="https://img.shields.io/badge/sources-20-64748B" alt="20 sources">
+    <img src="https://img.shields.io/badge/languages-EN%20%C2%B7%20%E7%B9%81%20%C2%B7%20%E7%AE%80-7c3aed" alt="Three languages">
+    <img src="https://img.shields.io/badge/zero%20dependencies-double--click%20to%20run-7c3aed" alt="Zero dependency">
+    <img src="https://img.shields.io/badge/sources%20verified-2026--09--08-64748B" alt="Verified 2026-09-08">
   </p>
 </div>
 
 ---
 
-> ⚠️ **本工具不构成法律或合规意见。** 所列控制点是对公开监管条文的结构化整理，不能取代阅读条文原文，
-> 亦不能取代具备资格的法律或合规专业人士的判断。监管要求持续更新，请以监管机构官网最新版本为准。
+> ⚠️ **This tool is not legal or compliance advice.** The controls listed are a structured reading of
+> publicly available regulatory provisions. They are not a substitute for reading the source documents,
+> nor for the judgement of a qualified legal or compliance professional. Regulatory requirements change
+> continuously — always check the latest version published on the regulator's own website.
 
-## 简介
+## What this is
 
-香港的金融机构同时受多个监管机构的网络安全要求约束：证监会（SFC）、金管局（HKMA）、私隐专员公署（PCPD），
-2026 年起还有《保护关键基础设施（电脑系统）条例》。条文散落在指引、通函、监管政策手册和实务守则中，
-同一项控制往往被多个机构以不同措辞重复要求。
+Financial institutions in Hong Kong answer to several regulators on cybersecurity at once: the Securities
+and Futures Commission (SFC), the Hong Kong Monetary Authority (HKMA), the Privacy Commissioner for
+Personal Data (PCPD), and — from 2026 — the Protection of Critical Infrastructures (Computer Systems)
+Ordinance. The requirements are scattered across guidelines, circulars, Supervisory Policy Manual modules
+and codes of practice, and the same control is often demanded by several regulators in different words.
 
-本工具把这些条文拆解为**可勾选的控制点**：选择贵公司持有的牌照与业务特征，即时得到适用的控制点清单，
-每条都标注**来源法规、条款编号、发布日期与官方原文链接**，并可自评打分、导出底稿。
+This tool breaks those provisions down into **checkable controls**. Select the licences your firm holds
+and its business characteristics, and you get the list of controls that apply — each one citing its
+**source document, clause number, issue date and official link** — which you can then self-assess and export.
 
-## 快速开始
+## Quick start
 
-不需要安装任何东西，也不需要构建步骤：
+Nothing to install, no build step:
 
 ```bash
 git clone https://github.com/arthurpanhku/hk-cyber-compliance.git
 ```
 
-然后**双击 `index.html`** 即可在浏览器中使用。数据以 `.js` 形式加载而非 `.json`，正是为了让本地
-`file://` 打开时不被浏览器 CORS 策略拦截——不需要起服务器。
+Then **double-click `index.html`**. Data is loaded as `.js` rather than `.json` precisely so that opening
+the page from `file://` is not blocked by the browser's CORS policy — no server needed.
 
-也可直接部署到 GitHub Pages（仓库设置 → Pages → 从 `main` 分支根目录发布）。
+It also deploys to GitHub Pages as-is (repository settings → Pages → publish from the `main` branch root).
 
-## 功能
+## Features
 
-| 功能 | 说明 |
+| Feature | Description |
 | --- | --- |
-| **按牌照筛选** | 14 种牌照／实体类型（SFC 各类受规管活动、VASP、认可机构、储值支付工具、一般企业） |
-| **按业务特征细分** | 6 项特征（互联网交易、电子银行、处理个人资料、关键基础设施指定、外判／云端、使用 AI 模型）决定同一牌照下条文是否适用 |
-| **控制点去重与交叉映射** | 同一项要求被 SFC 与 HKMA 同时规定时合并为一张卡片，并逐一列出各自的条文出处与条款编号 |
-| **条文可追溯** | 每条控制点附中文说明 + 英文条文原文引述 + 条款编号 + 发布日期 + 官方链接 |
-| **自评与差距报告** | 每项可标记「已实施／部分／未实施／不适用」，实时计算合规度，支持「只看未完成」 |
-| **导出** | 一键导出 CSV（含 BOM，Excel 直接打开中文不乱码）或打印为 PDF（自动附牌照范围抬头） |
-| **本地保存** | 选择与自评进度存于浏览器 localStorage，不上传任何数据 |
+| **Filter by licence** | 14 licence / entity types (SFC regulated activities, VASP, authorized institutions, stored value facilities, general companies) |
+| **Narrow by business profile** | 6 characteristics (internet trading, e-banking, personal data processing, CI designation, outsourcing/cloud, use of AI models) decide whether a provision applies to a given licence |
+| **De-duplication and cross-mapping** | Where the SFC and HKMA impose the same requirement, it is merged into a single card listing each regulator's own provision and clause number |
+| **Traceable to source** | Every control carries a description, the quoted official English text, the clause number, the issue date and the official link |
+| **Self-assessment and gap report** | Mark each control implemented / partial / not implemented / N/A, see a live compliance score, and filter to outstanding items |
+| **Three languages** | English, Traditional Chinese and Simplified Chinese, switchable in the header — including the CSV export |
+| **Export** | One-click CSV (with BOM, so Chinese opens correctly in Excel) or print to PDF (with a licence-scope header) |
+| **Stored locally** | Selections and self-assessment progress live in browser localStorage; nothing is uploaded |
 
-## 覆盖范围
+## Coverage
 
-v1.1.0 共 **102 条控制点**，来自 **20 份**官方文件（全部链接与日期于 2026-09-08 经官网核验）：
+v1.2.0 contains **102 controls** drawn from **20** official documents (all links and dates verified
+against the regulators' websites on 2026-09-08).
 
-### 证监会 SFC（42 条）
+### SFC (42 controls)
 
-| 文件 | 日期 | 说明 |
+| Document | Date | Notes |
 | --- | --- | --- |
-| [减低及缓减与互联网交易相关的黑客入侵风险指引](https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/guidelines-for-reducing-and-mitigating-hacking-risks-associated-with-internet-trading/guidelines-for-reducing-and-mitigating-hacking-risks-associated-with-internet-trading.pdf) | 2017-10-27 | 全部 20 项基线控制，逐条对应原文条款号 |
-| [通函 26EC35：抗钓鱼认证与可疑活动监控](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC35) | 2026-07-09 | OTP 不再获接受；passkey／设备绑定；**限期 2027-07-08** |
-| [通函 26EC32：应对 AI 驱动网络攻击](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC32) | 2026-06-02 | 资产清单、加速补丁、最小权限、微分段、不可信输入处理 |
-| 《操守准则》第 18 段及附表 7 | — | 互联网交易的上位规定 |
+| [Guidelines for Reducing and Mitigating Hacking Risks Associated with Internet Trading](https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/guidelines-for-reducing-and-mitigating-hacking-risks-associated-with-internet-trading/guidelines-for-reducing-and-mitigating-hacking-risks-associated-with-internet-trading.pdf) | 2017-10-27 | All 20 baseline controls, each mapped to its clause number |
+| [Circular 26EC35: phishing-resistant authentication and suspicious activity monitoring](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC35) | 2026-07-09 | OTP no longer accepted; passkeys / device binding; **deadline 2027-07-08** |
+| [Circular 26EC32: addressing AI-enabled cyberattacks](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC32) | 2026-06-02 | Asset inventory, accelerated patching, least privilege, micro-segmentation, handling of untrusted input |
+| Code of Conduct paragraph 18 and Schedule 7 | — | The overarching rules for internet trading |
 
-### 金管局 HKMA — 认可机构（24 条）
+### HKMA — authorized institutions (24 controls)
 
-| 文件 | 日期 | 说明 |
+| Document | Date | Notes |
 | --- | --- | --- |
-| [SPM TM-C-1 网络风险管理的监管方针](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20241202-2-EN) | 2024-11-29 | 法定指引；C-RAF 的现行依据 |
-| [SPM TM-E-1 电子银行风险管理（第 4 版）](https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/TM-E-1) | 2024-10-25 | 法定指引 |
-| [SPM TM-G-1 科技风险管理一般原则](https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/TM-G-1) | 2003-06-24 | |
-| [SPM OR-2 营运韧性](https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/OR-2) | 2022-05-31 | |
-| [SPM SA-2 外判](https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/SA-2) | 2001-12-28 | |
-| [通函：网络安全强化计划 2.0（C-RAF 2.0）](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20201103-1-EN) | 2020-11-03 | 固有风险评估、成熟度评估、iCAST |
-| [通函：AI 驱动网络威胁下的网络韧性](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20260529-8-EN) | 2026-06-02 | |
+| [SPM TM-C-1 Supervisory Approach on Cyber Risk Management](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20241202-2-EN) | 2024-11-29 | Statutory guidance; the current basis for C-RAF |
+| [SPM TM-E-1 Risk Management of E-banking (V.4)](https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/TM-E-1) | 2024-10-25 | Statutory guidance |
+| [SPM TM-G-1 General Principles for Technology Risk Management](https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/TM-G-1) | 2003-06-24 | |
+| [SPM OR-2 Operational Resilience](https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/OR-2) | 2022-05-31 | |
+| [SPM SA-2 Outsourcing](https://brdr.hkma.gov.hk/eng/doc-ldg/spm/current/SA-2) | 2001-12-28 | |
+| [Circular: Cybersecurity Fortification Initiative 2.0 (C-RAF 2.0)](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20201103-1-EN) | 2020-11-03 | Inherent risk assessment, maturity assessment, iCAST |
+| [Circular: Strengthening Cyber Resilience amid AI-Empowered Cyber Threats](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20260529-8-EN) | 2026-06-02 | |
 
-### 金管局 HKMA — 储值支付工具持牌人（15 条）
+### HKMA — stored value facility licensees (15 controls)
 
-| 文件 | 日期 | 说明 |
+| Document | Date | Notes |
 | --- | --- | --- |
-| [储值支付工具持牌人监管指引（G.N. 5043）](https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/Guidelines-on-supervision-of-SVF-licensees_Eng.pdf) | 2016-09 | 《支付系统及储值支付工具条例》第 54(1A)(b) 条；第 7.2／7.3／7.4 节的科技风险、支付保安与业务连续性要求 |
-| [储值支付工具持牌人监管实务备考](https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/PN_on_supervision_of_SVF_licensees_eng.pdf) | 2025-10 | 逐段说明达标方式，含反诈骗要求：**讯息不得嵌入超连结** |
-| [SVF 界别关键基础设施实务守则](https://www.occics.gov.hk/filemanager/en/content_19/SCoP_SVF_Licensees_en.pdf) | 2026-06-12 | 适用于被指定为 CI 营运者的 SVF 持牌人 |
+| [Guideline on Supervision of Stored Value Facility Licensees (G.N. 5043)](https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/Guidelines-on-supervision-of-SVF-licensees_Eng.pdf) | 2016-09 | Issued under s.54(1A)(b) of the Payment Systems and Stored Value Facilities Ordinance; technology risk, payment security and business continuity requirements in sections 7.2 / 7.3 / 7.4 |
+| [Practice Note on Supervision of Stored Value Facility Licensees](https://www.hkma.gov.hk/media/eng/doc/key-functions/financial-infrastructure/PN_on_supervision_of_SVF_licensees_eng.pdf) | 2025-10 | Explains how each principle is met in practice, including the anti-scam rule: **no hyperlinks embedded in messages** |
+| [Code of Practice for the SVF sector under the CI Ordinance](https://www.occics.gov.hk/filemanager/en/content_19/SCoP_SVF_Licensees_en.pdf) | 2026-06-12 | Applies to SVF licensees designated as CI operators |
 
-### 关键基础设施（13 条）
+### Critical infrastructure (13 controls)
 
-| 文件 | 日期 | 说明 |
+| Document | Date | Notes |
 | --- | --- | --- |
-| [《保护关键基础设施（电脑系统）条例》实务守则（通用版）](https://www.occics.gov.hk/filemanager/en/content_19/CoP_en_v1.0.pdf) | 2026-01-01 | 三类法定责任；严重事故 **12 小时**、其他 **48 小时**通报，书面报告 **14 日** |
-| [金管专员发出的银行界别实务守则](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20260527-25-EN) | 2026-06-02 | 适用于被指定为 CI 营运者的认可机构 |
+| [Code of Practice under the Protection of Critical Infrastructures (Computer Systems) Ordinance (Generic)](https://www.occics.gov.hk/filemanager/en/content_19/CoP_en_v1.0.pdf) | 2026-01-01 | Three categories of statutory obligation; **12 hours** for serious incidents, **48 hours** otherwise, written report within **14 days** |
+| [Banking sector Code of Practice issued by the Monetary Authority](https://brdr.hkma.gov.hk/eng/doc-ldg/docId/20260527-25-EN) | 2026-06-02 | Applies to authorized institutions designated as CI operators |
 
-### 私隐专员公署 PCPD（8 条）
+### PCPD (8 controls)
 
-| 文件 | 说明 |
+| Document | Notes |
 | --- | --- |
-| [《个人资料（私隐）条例》（第 486 章）六项保障资料原则](https://www.pcpd.org.hk/english/data_privacy_law/6_data_protection_principles/principles.html) | 以 DPP4 资料保安原则为核心 |
+| [Personal Data (Privacy) Ordinance (Cap. 486) — six Data Protection Principles](https://www.pcpd.org.hk/english/data_privacy_law/6_data_protection_principles/principles.html) | Centred on DPP4, the data security principle |
 
-## 适用性判定规则
+## How applicability is decided
 
-每条控制点的 `applicability` 由两部分组成：
+Each control's `applicability` has two parts:
 
-- **`licenses`（任一命中）** —— 勾选的牌照中只要有一个在列表内即适用
-- **`attributes`（全部具备）** —— 列出的业务特征必须**全部**勾选才适用
+- **`licenses` (any match)** — applies if any one of the ticked licences appears in the list
+- **`attributes` (all required)** — applies only if **every** listed business characteristic is ticked
 
-例如 SFC 黑客风险指引的控制点适用于 `第 1、2、3、9 类` 及 `VASP`，但**必须**同时勾选「提供互联网交易设施」——
-这与指引第 3 段的适用范围一致（第 3 类仅限持牌杠杆式外汇交易商；第 9 类仅限透过自身互联网交易设施分销基金）。
+For example, the SFC Hacking Risks controls apply to `Types 1, 2, 3, 9` and `VASP`, but **only** when
+"offers internet trading facilities" is also ticked — matching paragraph 3 of the Guidelines (Type 3 is
+limited to licensed leveraged foreign exchange traders; Type 9 to distributing its own funds through its
+own internet trading facility).
 
-## 关于「合并跨监管重复项」
+## About "merge duplicates across regulators"
 
-合并只在**双向交叉引用**时发生：控制点 A 引用 B **且** B 也引用 A，才视为同一项要求并合并为一张卡片。
-单向引用只显示为「另见」标签，不合并。
+Merging happens only on a **bidirectional cross-reference**: control A references B **and** B references A.
+A one-way reference shows up as a "see also" tag and is not merged.
 
-这条规则是刻意保守的。若采用引用关系的传递闭包，会把范围不对等的条文错误等同——
-例如把「每日离线备份」和「在严重情景下测试关键业务交付能力」合并，或把强制的 12 小时法定事故通报
-与《私隐条例》下的自愿通报合并。两者性质不同，合并会造成合规误读。
+That rule is deliberately conservative. Taking the transitive closure of references would wrongly equate
+provisions of unequal scope — merging "daily offline backup" with "test the ability to deliver critical
+operations under severe but plausible scenarios", say, or merging the mandatory 12-hour statutory incident
+notification with voluntary notification under the PDPO. Those are different obligations, and merging them
+would mislead.
 
-在勾选全部牌照与业务特征的最大范围下，102 条条文合并为 **82 项**独立要求。
+Selecting every licence and characteristic, the 102 provisions collapse to **82** distinct requirements.
 
-> **部署注意**：仓库根目录的 `.nojekyll` 不可删除。GitHub Pages 默认以 Jekyll 处理站点，
-> 而 Jekyll 会忽略以下划线开头的路径，导致 `data/_registry.js` 返回 404、整个应用无法启动。
+> **Deployment note**: do not delete `.nojekyll` in the repository root. GitHub Pages processes sites with
+> Jekyll by default, and Jekyll ignores paths beginning with an underscore — which would make
+> `data/_registry.js` return 404 and stop the application from starting.
 
-## 数据结构
+## Languages
+
+The interface, the control descriptions and the CSV export are available in English, Traditional Chinese
+and Simplified Chinese. The language is picked from `?lang=`, then a saved preference, then the browser's
+`Accept-Language`, falling back to English. It is switchable in the header and remembered across visits.
+
+Quoted provisions are **never translated** — they are always reproduced in the official English text as
+published by the regulator, with a link to the source. Where any description differs from the official
+text, the official text governs.
 
 ```
-.nojekyll                 关闭 GitHub Pages 的 Jekyll 处理（必需，勿删）
+data/i18n/
+├── zh-Hans.js     Simplified UI strings (the base data itself is Simplified)
+├── zh-Hant.js     Traditional layer — GENERATED, do not edit by hand
+└── en.js          English layer — UI strings and all control text
+```
+
+The base data is authored in Simplified Chinese. The Traditional layer is generated from it with OpenCC
+in `s2hk` mode, so the vocabulary is Hong Kong's (網絡 / 軟件 / 私隱, not the Taiwan forms), with a small
+override table restoring the character forms used in Hong Kong legislation and by the HKMA and SFC
+(戶 / 說 / 啟 / 群 / 溫 / 閱 rather than the Education Bureau's 户 / 説 / 啓 / 羣 / 温 / 閲).
+
+To regenerate after changing any Chinese text:
+
+```bash
+pip install opencc-python-reimplemented
+python3 tools/gen-hant.py
+```
+
+English is hand-written against the regulators' English source documents rather than translated from the
+Chinese — the SFC circulars, HKMA SPM modules and the Codes of Practice are English-language originals, so
+the English text matches the wording a reader will find in the cited document.
+
+## Data structure
+
+```
+.nojekyll                 disables Jekyll on GitHub Pages (required, do not delete)
 data/
-├── _registry.js          全局注册表
-├── sources.js            20 份条文出处（标题、日期、法律地位、官方链接）
-├── taxonomy.js           14 种牌照 · 6 项业务特征 · 10 个控制域
+├── _registry.js          global registry and locale lookup
+├── sources.js            20 source documents (title, date, legal status, official link)
+├── taxonomy.js           14 licences · 6 business characteristics · 10 control domains
+├── i18n/
+│   ├── zh-Hans.js        Simplified UI strings
+│   ├── zh-Hant.js        Traditional layer (generated)
+│   └── en.js             English layer
 └── controls/
-    ├── sfc-internet-trading.js    SFC 黑客风险指引 20 项 + 操守准则
-    ├── sfc-circulars-2026.js      SFC 2026 年两份通函
+    ├── sfc-internet-trading.js    SFC Hacking Risks Guidelines (20) + Code of Conduct
+    ├── sfc-circulars-2026.js      the two 2026 SFC circulars
     ├── hkma.js                    TM-G-1 / TM-E-1 / TM-C-1 / OR-2 / SA-2 / C-RAF
-    ├── svf.js                     储值支付工具指引与实务备考
-    ├── pdpo.js                    六项保障资料原则
-    └── critical-infrastructure.js 关键基础设施条例三类责任
+    ├── svf.js                     SVF Guideline and Practice Note
+    ├── pdpo.js                    the six Data Protection Principles
+    └── critical-infrastructure.js the three categories of CI obligation
 ```
 
-单条控制点的形态：
+A single control looks like this — authored in Simplified Chinese, with other languages supplied by the
+overlay files in `data/i18n/`:
 
 ```js
 {
   id: 'SFC-IT-1.1',
-  domain: 'identity',                  // 控制域，见 taxonomy.js
+  domain: 'identity',                  // control domain, see taxonomy.js
   priority: 'baseline',                // baseline | enhanced
-  sourceId: 'sfc-hacking',             // 指向 sources.js
-  clause: '1.1',                       // 条文中的条款编号
+  sourceId: 'sfc-hacking',             // points into sources.js
+  clause: '1.1',                       // clause number in the source document
   title: '客户账户登录须实施双重认证',
-  requirement: '……',                   // 中文说明
-  quote: 'A licensed or registered person should implement …',  // 英文原文引述
+  requirement: '……',
+  quote: 'A licensed or registered person should implement …',  // official English, never translated
   applicability: { licenses: [...], attributes: [...] },
-  deadline: '2027-07-08',              // 可选：合规限期
+  deadline: '2027-07-08',              // optional compliance deadline
   crossRefs: ['SFC-PH-A1', 'HKMA-TME1-4.1']
 }
 ```
 
-## 已知缺口
+## Known gaps
 
-**保险业监管局（IA）的网络安全指引尚未纳入。** `ia.org.hk` 全站启用了 Cloudflare 机器人验证，
-自动化工具无法取得原文 PDF。本项目不接受凭记忆撰写的条文，因此在取得官方原文前不会加入 IA 相关控制点，
-牌照选项中亦暂未列出保险中介人／授权保险人。欢迎以 PR 形式补充（请附官方 PDF 出处与条款编号）。
+**The Insurance Authority (IA) cybersecurity guidelines are not yet included.** The whole of `ia.org.hk`
+sits behind Cloudflare bot verification, so automated tools cannot retrieve the source PDFs. This project
+does not accept provisions written from memory, so no IA controls will be added until the official text can
+be obtained, and insurance intermediaries / authorized insurers are not yet listed among the licence
+options. Pull requests welcome — please cite the official PDF and clause numbers.
 
-## 贡献
+## Contributing
 
-欢迎补充条文、修正措辞、更新监管变化。提交前请运行校验：
+Additions, corrections and regulatory updates are welcome. Before submitting, run the validator:
 
 ```bash
 node tools/validate.mjs
 ```
 
-校验项包括：ID 唯一、出处存在、控制域／牌照／业务特征有效、交叉引用可解析、必填字段齐全。
-详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+It checks that IDs are unique, sources exist, domains / licences / characteristics are valid, cross
+references resolve, required fields are present, **and that the English and Traditional layers are complete**
+— a control added without its translations fails the build. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## 授权
+## Licence
 
-[MIT](LICENSE)。条文原文的版权归各监管机构所有，本项目仅作结构化引用并链接至官方来源。
+[MIT](LICENSE). Copyright in the quoted provisions remains with the respective regulators; this project
+only reproduces them in structured form and links to the official sources.

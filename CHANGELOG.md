@@ -2,6 +2,26 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.2.0] — 2026-09-09
+
+### 新增
+
+- **三种语言：英文、繁体中文、简体中文。** 界面、控制点说明与导出的 CSV 全部随语言切换；
+  页首新增语言切换按钮，选择会记住。语言按 `?lang=` → 已保存偏好 → 浏览器 `Accept-Language`
+  的顺序判定，默认英文
+- `data/i18n/`：`zh-Hans.js`（界面字符串）、`en.js`（界面字符串 + 102 条控制点的英文）、
+  `zh-Hant.js`（繁体层，自动生成）
+- `tools/gen-hant.py`：以 OpenCC `s2hk` 从简体生成繁体层与 `README.zh-Hant.md`，
+  并以覆盖表把字形改回香港法例与金管局、证监会的写法（戶／說／啟／群／溫／閱）
+- README 提供三种语言：`README.md`（英文）、`README.zh-Hant.md`、`README.zh-Hans.md`
+- `tools/validate.mjs` 新增漏译校验：新增控制点若未补英文，校验失败
+
+### 变更
+
+- 应用与 `README.md` 的默认语言改为英文；原简体 README 移至 `README.zh-Hans.md`
+- 条文引述（`quote`）明确为任何语言下都不翻译，永远显示监管机构发布的英文原文
+- 新标志：盾牌内含条文横杠与勾；新增 `assets/logo-dark.svg`，修正深色主题下标题不可见
+
 ## [1.1.0] — 2026-09-08
 
 ### 新增
