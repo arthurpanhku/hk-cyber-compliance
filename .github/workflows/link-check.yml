@@ -1,0 +1,30 @@
+name: 条文链接检查
+
+# 链接烂掉是这个工具最可能、也最难察觉的失效方式：页面照常渲染，
+# 只是点进去 404。监管机构改版频繁，故每周自动巡检一次。
+#
+# 不挂在 PR 上：外部站点的偶发故障不应该挡住贡献者。
+on:
+  schedule:
+    - cron: '0 1 * * 1'      # 每周一 01:00 UTC（香港时间 09:00）
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    name: 巡检 20 份出处的官方链接
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 只有确定失效（404 / 410 / 域名解析不了）才会失败。
+      # 403 / 429 多为机器人防护，5xx 与超时多为暂时性故障，只报告不失败——
+      # 否则这个任务会长期红着，很快就没人看了。
+      - name: node tools/check-links.mjs
+        run: node tools/check-links.mjs

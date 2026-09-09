@@ -1,0 +1,49 @@
+name: CI
+
+# CONTRIBUTING 写明「校验不通过的 PR 不会合并」——这里让它真正被执行，
+# 而不是靠自觉。
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: 数据校验与生成物同步
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ID 唯一、出处存在、交叉引用可解析、必填字段齐全、
+      # 每份出处有 verifiedOn、英文与繁体层无漏译。
+      - name: node tools/validate.mjs
+        run: node tools/validate.mjs
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: 安装 OpenCC
+        run: pip install --quiet opencc-python-reimplemented
+
+      # 繁体层与繁体 README 都是生成物。若有人改了简体原文却忘了重新生成，
+      # 繁体界面就会停留在旧文案——这一步把它变成显式失败。
+      - name: 重新生成繁体层
+        run: python3 tools/gen-hant.py
+
+      - name: 确认生成物已提交且为最新
+        run: |
+          if ! git diff --exit-code -- data/i18n/zh-Hant.js README.zh-Hant.md; then
+            echo ''
+            echo '::error::繁体生成物与简体原文不同步。'
+            echo '请在本地运行 python3 tools/gen-hant.py 并提交结果。'
+            exit 1
+          fi

@@ -244,6 +244,8 @@
     for (const c of group) {
       const s = trSource(c.sourceId);
       const line = el('div', 'source-line');
+      // 逐份出处各有自己的核验日期，悬停可见；避免与发布日期挤在同一行造成混淆。
+      if (s.verifiedOn) line.title = t('sourceMetaTip', { issued: s.issued, verified: s.verifiedOn });
       const a = el('a', null, HKCC.sourceTitle(c.sourceId));
       a.href = s.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
       line.append(el('span', 'tag reg-' + regKey(HKCC.sources[c.sourceId].regulator), s.regulator), a,
@@ -364,8 +366,8 @@
   function toCSV() {
     const cell = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
     const rows = [[t('csvId'), t('csvDomain'), t('csvTitle'), t('csvRequirement'),
-      t('csvRegulator'), t('csvSource'), t('csvClause'), t('csvIssued'), t('csvDeadline'),
-      t('csvUrl'), t('csvQuote'), t('csvStatus')]];
+      t('csvRegulator'), t('csvSource'), t('csvClause'), t('csvIssued'), t('csvVerified'),
+      t('csvDeadline'), t('csvUrl'), t('csvQuote'), t('csvStatus')]];
     const statusLabel = id => {
       const s = STATUSES.find(x => x.id === id);
       return s ? t(s.key) : t('statusUnrated');
@@ -378,7 +380,7 @@
         const dRaw = HKCC.domains.find(x => x.id === raw.domain);
         const d = dRaw ? trDomain(dRaw) : null;
         rows.push([raw.id, d ? d.label : raw.domain, c.title, c.requirement, s.regulator,
-          HKCC.sourceTitle(raw.sourceId), c.clause || raw.clause, s.issued,
+          HKCC.sourceTitle(raw.sourceId), c.clause || raw.clause, s.issued, s.verifiedOn || '',
           raw.deadline || '', s.url, raw.quote || '', status]);
       }
     }
@@ -412,7 +414,7 @@
     $('#ph-scope').textContent = t('phScope') + (lics.join(sep) || t('phNone'));
     $('#ph-attrs').textContent = t('phAttrs') + (attrs.join(sep) || t('phNone'));
     $('#ph-date').textContent = t('phDate', {
-      today: new Date().toISOString().slice(0, 10), verified: HKCC.meta.verifiedOn
+      today: new Date().toISOString().slice(0, 10), verified: HKCC.verifiedOn()
     });
   }
 
@@ -432,7 +434,10 @@
     $('#merge-label').textContent = t('optMerge');
     $('#gaps-label').textContent = t('optGaps');
     $('#version').textContent =
-      t('versionLine', { version: HKCC.meta.version, date: HKCC.meta.verifiedOn });
+      t('versionLine', { version: HKCC.meta.version, date: HKCC.verifiedOn() });
+    // 各出处核验日期不一致时，页首显示最早的一个，并在悬停时说明区间。
+    $('#version').title = HKCC.verifiedOn() === HKCC.lastVerifiedOn()
+      ? '' : t('verifiedRangeTip', { from: HKCC.verifiedOn(), to: HKCC.lastVerifiedOn() });
 
     const foot = $('#disclaimer');
     foot.innerHTML = '';
