@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>香港網絡安全合規助手</title>
-<meta name="description" content="按牌照與業務特徵生成 SFC、HKMA、PCPD 及關鍵基礎設施條例的網絡安全控制要求，每條均標註官方條文出處。">
+<title>HK Cyber Compliance Assistant</title>
+<meta name="description" content="Generate the cybersecurity control requirements that apply to your firm under SFC, HKMA, PCPD and the Critical Infrastructure Ordinance — every control cited to its official source.">
 <link rel="stylesheet" href="css/app.css">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 </head>
@@ -12,17 +12,20 @@
 
 <header class="site-header">
   <div class="brand">
-    <h1>香港網絡安全合規助手</h1>
+    <img class="brand-mark" src="assets/icon.svg" alt="" width="26" height="26">
+    <h1 id="app-title">HK Cyber Compliance Assistant</h1>
     <span class="sub" id="version"></span>
   </div>
   <div class="header-actions">
-    <button id="export-project" class="primary">匯出項目</button>
-    <button id="import-project">匯入項目</button>
+    <!-- 语言按钮由 app.js 依 HKCC.locales 生成 -->
+    <div class="lang" id="lang" role="group"></div>
+    <button id="export-project" class="primary"></button>
+    <button id="import-project"></button>
     <input id="import-file" type="file" accept=".json,.hkcc.json,application/json" hidden>
-    <button id="export-csv">匯出 CSV</button>
-    <button id="print">列印／存為 PDF</button>
-    <button id="reset">重設</button>
-    <button id="theme" title="切換淺色／深色／跟隨系統">主題</button>
+    <button id="export-csv"></button>
+    <button id="print"></button>
+    <button id="reset"></button>
+    <button id="theme"></button>
   </div>
 </header>
 
@@ -31,7 +34,7 @@
 
   <main>
     <div class="print-header">
-      <h1>香港網絡安全合規控制清單</h1>
+      <h1 id="ph-title"></h1>
       <p id="ph-project"></p>
       <p id="ph-scope"></p>
       <p id="ph-attrs"></p>
@@ -41,25 +44,17 @@
     <div class="panel summary" id="summary"></div>
 
     <div class="panel toolbar">
-      <input type="search" id="q" placeholder="搜尋控制、條文、證據或負責人…" aria-label="搜尋控制要求">
-      <select id="domain-filter" aria-label="按控制領域篩選">
-        <option value="">所有控制領域</option>
-      </select>
-      <label class="inline"><input type="checkbox" id="merge"> 合併跨監管重複項</label>
-      <label class="inline"><input type="checkbox" id="gaps"> 整改清單</label>
+      <input type="search" id="q">
+      <select id="domain-filter"></select>
+      <label class="inline"><input type="checkbox" id="merge"> <span id="merge-label"></span></label>
+      <label class="inline"><input type="checkbox" id="gaps"> <span id="gaps-label"></span></label>
     </div>
 
     <div id="results"></div>
   </main>
 </div>
 
-<footer class="disclaimer">
-  <p><strong>免責聲明：</strong>本工具為開源參考工具，不構成法律或合規意見。所列控制要求為對公開監管條文的結構化整理，
-  不能取代閱讀條文原文，亦不能取代具備資格的法律或合規專業人士的判斷。
-  監管要求會持續更新，請以各監管機構官方網站發布的最新版本為準。</p>
-  <p><strong>關於條文語言：</strong>控制說明以中文撰寫以便閱讀，英文來源文字按「原文／節錄／說明」標示並附官方連結。
-  如中文說明與監管機構原文有任何出入，概以監管機構發布的原文為準。</p>
-</footer>
+<footer class="disclaimer" id="disclaimer"></footer>
 
 <script src="data/_registry.js"></script>
 <script src="data/sources.js"></script>
@@ -70,6 +65,10 @@
 <script src="data/controls/svf.js"></script>
 <script src="data/controls/pdpo.js"></script>
 <script src="data/controls/critical-infrastructure.js"></script>
+<script src="data/i18n/zh-Hans.js"></script>
+<script src="data/i18n/zh-Hant.js"></script>
+<script src="data/i18n/en.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/app.js"></script>
 </body>

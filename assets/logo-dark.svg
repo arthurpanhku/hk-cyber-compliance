@@ -19,7 +19,7 @@
   </g>
   <!-- textLength 锁定字宽，使不同系统字体下锁形宽度一致 -->
   <text x="78" y="43" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC',sans-serif" font-size="29" font-weight="650"
-        fill="#14181f" textLength="290" lengthAdjust="spacing">香港网络安全合规助手</text>
+        fill="#e6e9ee" textLength="290" lengthAdjust="spacing">香港网络安全合规助手</text>
   <text x="79" y="65" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC',sans-serif" font-size="12.5"
-        fill="#5a6472" textLength="252" lengthAdjust="spacing">SFC · HKMA · PCPD · 关键基础设施条例</text>
+        fill="#9aa4b2" textLength="252" lengthAdjust="spacing">SFC · HKMA · PCPD · 关键基础设施条例</text>
 </svg>

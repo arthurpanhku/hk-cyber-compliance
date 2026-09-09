@@ -1,0 +1,3 @@
+# 由 tools/gen-hant.py 生成，在 PR diff 中默认折叠，并排除在语言统计之外。
+data/i18n/zh-Hant.js linguist-generated=true
+README.zh-Hant.md    linguist-generated=true

@@ -1,6 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <path d="M32 4 8 13v20c0 14.4 9.8 24.6 24 27 14.2-2.4 24-12.6 24-27V13z" fill="#1d4ed8"/>
-  <path d="M32 12 16 18v15c0 10.2 6.7 17.6 16 19.7 9.3-2.1 16-9.5 16-19.7V18z" fill="#fff" opacity=".16"/>
-  <path d="M22 32.5 29 39l13-13.5" fill="none" stroke="#fff" stroke-width="5"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img"
+     aria-label="香港网络安全合规助手">
+  <defs>
+    <linearGradient id="hkcc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <!-- 盾牌：网络安全 -->
+  <path d="M32 4.5 L54.8 12.1 Q56.5 12.7 56.5 14.4 V33 C56.5 46.4 46.6 55.9 32.6 59.4
+           Q32 59.6 31.4 59.4 C17.4 55.9 7.5 46.4 7.5 33 V14.4 Q7.5 12.7 9.2 12.1 Z"
+        fill="url(#hkcc)"/>
+  <!-- 条文：散落的监管条款 -->
+  <g fill="#fff" opacity=".55">
+    <rect x="19.5" y="16" width="25" height="4.6" rx="2.3"/>
+    <rect x="19.5" y="24.2" width="15.5" height="4.6" rx="2.3"/>
+  </g>
+  <!-- 勾：已核对的控制点 -->
+  <path d="M20.8 40.8 L28.4 48.4 L44 32.8" fill="none" stroke="#fff" stroke-width="7"
         stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

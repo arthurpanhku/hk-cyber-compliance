@@ -1,4 +1,4 @@
-/* 香港網絡安全合規助手 —— 評估工作台。無框架、無建構步驟。 */
+/* HK Cyber Compliance Assistant — practical assessment workspace. */
 (function () {
   'use strict';
 
@@ -7,11 +7,11 @@
   const LEGACY_STORE_KEY = 'hkcc.state.v1';
   const MAX_PROJECT_BYTES = 5 * 1024 * 1024;
   const STATUSES = [
-    { id: 'none', label: '未評', cls: 's-none' },
-    { id: 'done', label: '已實施', cls: 's-done' },
-    { id: 'partial', label: '部分', cls: 's-partial' },
-    { id: 'gap', label: '未實施', cls: 's-gap' },
-    { id: 'na', label: '不適用', cls: 's-na' }
+    { id: 'none', key: 'statusUnrated', cls: 's-none' },
+    { id: 'done', key: 'statusDone', cls: 's-done' },
+    { id: 'partial', key: 'statusPartial', cls: 's-partial' },
+    { id: 'gap', key: 'statusGap', cls: 's-gap' },
+    { id: 'na', key: 'statusNa', cls: 's-na' }
   ];
   const byId = new Map(HKCC.controls.map(c => [c.id, c]));
   const definitions = {
@@ -48,6 +48,12 @@
   };
   const regKey = regulator => regulator === 'SFC' ? 'SFC' :
     regulator === 'HKMA' ? 'HKMA' : regulator === 'PCPD' ? 'PCPD' : 'CI';
+  const t = (key, vars) => HKCC.t(key, vars);
+  const trControl = control => HKCC.tr('controls', control.id, control);
+  const trSource = id => HKCC.tr('sources', id, HKCC.sources[id]);
+  const trLicense = licence => HKCC.tr('licenses', licence.id, licence);
+  const trAttribute = attribute => HKCC.tr('attributes', attribute.id, attribute);
+  const trDomain = domain => HKCC.tr('domains', domain.id, domain);
 
   function projectData(includeExportTime) {
     return {
@@ -132,9 +138,12 @@
     const query = state.query.toLowerCase();
     return group.some(control => {
       const source = HKCC.sources[control.sourceId];
+      const translated = trControl(control);
+      const translatedSource = trSource(control.sourceId);
       const record = assessment(control.id);
-      return [control.id, control.title, control.requirement, control.quote || '', control.clause,
-        source.titleZh, source.titleEn, source.regulator, record.implementationNote || '',
+      return [control.id, control.title, control.requirement, translated.title, translated.requirement,
+        control.quote || '', control.clause, source.titleZh, source.titleEn, translatedSource.titleZh,
+        source.regulator, record.implementationNote || '',
         record.evidenceRef || '', record.owner || ''].join(' ').toLowerCase().includes(query);
     });
   }
@@ -144,13 +153,13 @@
     box.innerHTML = '';
 
     const project = el('div', 'field-group project-fields');
-    project.appendChild(el('h2', null, '評估項目'));
-    project.appendChild(field('項目／機構名稱', 'text', state.project.name, value => {
+    project.appendChild(el('h2', null, t('secProject')));
+    project.appendChild(field(t('projectName'), 'text', state.project.name, value => {
       state.project.name = value;
       save();
       updatePrintHeader();
-    }, { maxlength: 200, placeholder: '例如：2026 年網絡安全評估' }));
-    project.appendChild(field('評估基準日期', 'date', state.project.asOfDate, value => {
+    }, { maxlength: 200, placeholder: t('projectNamePlaceholder') }));
+    project.appendChild(field(t('asOfDate'), 'date', state.project.asOfDate, value => {
       state.project.asOfDate = value || today();
       save();
       render();
@@ -158,20 +167,23 @@
     box.appendChild(project);
 
     const licences = el('div', 'field-group');
-    licences.appendChild(el('h2', null, '① 牌照／實體類型'));
+    licences.appendChild(el('h2', null, t('secLicenses')));
     let lastGroup = null;
-    for (const licence of HKCC.licenses) {
+    for (const rawLicence of HKCC.licenses) {
+      const licence = trLicense(rawLicence);
       if (licence.group !== lastGroup) {
         licences.appendChild(el('div', 'opt-group-label', licence.group));
         lastGroup = licence.group;
       }
-      licences.appendChild(option(licence, state.licenses));
+      licences.appendChild(option(rawLicence.id, licence, state.licenses));
     }
     box.appendChild(licences);
 
     const attributes = el('div', 'field-group');
-    attributes.appendChild(el('h2', null, '② 業務特徵'));
-    for (const attribute of HKCC.attributes) attributes.appendChild(option(attribute, state.attributes));
+    attributes.appendChild(el('h2', null, t('secAttributes')));
+    for (const rawAttribute of HKCC.attributes) {
+      attributes.appendChild(option(rawAttribute.id, trAttribute(rawAttribute), state.attributes));
+    }
     box.appendChild(attributes);
   }
 
@@ -188,13 +200,13 @@
     return label;
   }
 
-  function option(item, set) {
+  function option(id, item, set) {
     const label = el('label', 'opt');
     const input = el('input');
     input.type = 'checkbox';
-    input.checked = set.has(item.id);
+    input.checked = set.has(id);
     input.addEventListener('change', () => {
-      input.checked ? set.add(item.id) : set.delete(item.id);
+      input.checked ? set.add(id) : set.delete(id);
       save();
       render();
     });
@@ -224,22 +236,23 @@
     const out = $('#results');
     out.innerHTML = '';
     if (!state.licenses.size) {
-      out.appendChild(emptyState('請先在左側選擇牌照', '工具會按牌照及業務特徵列出適用控制要求。'));
+      out.appendChild(emptyState(t('emptyNoLicenseTitle'), t('emptyNoLicenseNote')));
       return;
     }
     if (!visible.length) {
-      out.appendChild(emptyState('沒有符合條件的控制要求',
-        state.gapsOnly ? '目前篩選下沒有未評、部分或未實施項目。' : '請調整搜尋字詞或篩選條件。'));
+      out.appendChild(emptyState(t('emptyNoMatchTitle'),
+        state.gapsOnly ? t('emptyNoMatchGaps') : t('emptyNoMatchQuery')));
       return;
     }
 
     for (const domain of HKCC.domains) {
       const groups = visible.filter(group => group[0].domain === domain.id);
       if (!groups.length) continue;
+      const translatedDomain = trDomain(domain);
       const section = el('section', 'domain');
-      const heading = el('h2', null, domain.label);
-      heading.appendChild(el('span', 'n', `${groups.length} 項`));
-      section.append(heading, el('p', 'desc', domain.desc));
+      const heading = el('h2', null, translatedDomain.label);
+      heading.appendChild(el('span', 'n', t('countItems', { n: groups.length })));
+      section.append(heading, el('p', 'desc', translatedDomain.desc));
       for (const group of groups) section.appendChild(renderControl(group));
       out.appendChild(section);
     }
@@ -263,22 +276,24 @@
 
   function renderControl(group) {
     const primary = group[0];
+    const translatedPrimary = trControl(primary);
     const card = el('article', 'panel control');
     const head = el('div', 'control-head');
     const titleBox = el('div');
-    titleBox.appendChild(el('h3', 'control-title', primary.title));
+    titleBox.appendChild(el('h3', 'control-title', translatedPrimary.title));
     titleBox.appendChild(el('div', 'control-ids', group.map(c => c.id).join('  ·  ')));
     head.appendChild(titleBox);
     const pending = E.pendingCount(group, state.assessments);
     head.appendChild(el('span', pending ? 'tag pending' : 'tag complete',
-      pending ? `${pending} 項待處理` : '全部完成'));
+      pending ? t('pendingCount', { n: pending }) : t('allComplete')));
     card.appendChild(head);
 
-    card.appendChild(el('p', 'control-req', primary.requirement));
+    card.appendChild(el('p', 'control-req', translatedPrimary.requirement));
     for (const control of group.slice(1)) {
       const extra = el('p', 'control-req');
-      extra.appendChild(el('strong', null, `${HKCC.sources[control.sourceId].regulator} 另有述明：`));
-      extra.appendChild(document.createTextNode(control.requirement));
+      extra.appendChild(el('strong', null,
+        t('alsoStates', { regulator: trSource(control.sourceId).regulator })));
+      extra.appendChild(document.createTextNode(' ' + trControl(control).requirement));
       card.appendChild(extra);
     }
 
@@ -289,10 +304,10 @@
     const quoted = group.filter(c => c.quote);
     if (quoted.length) {
       const details = el('details', 'quote');
-      details.appendChild(el('summary', null, '英文來源文字'));
+      details.appendChild(el('summary', null, t('quoteSummary')));
       for (const control of quoted) {
-        const label = control.quoteStatus === 'verbatim' ? '英文條文原文' :
-          control.quoteStatus === 'excerpt' ? '英文條文節錄' : '英文來源說明';
+        const label = control.quoteStatus === 'verbatim' ? t('quoteVerbatim') :
+          control.quoteStatus === 'excerpt' ? t('quoteExcerpt') : t('quoteSummaryType');
         details.appendChild(el('div', 'quote-kind', label));
         const quote = el('blockquote', null, control.quote);
         quote.appendChild(el('footer', 'source-line',
@@ -303,41 +318,50 @@
     }
 
     const tags = el('div', 'tags');
-    if (group.length > 1) tags.appendChild(el('span', 'tag merged', `跨監管合併 ${group.length} 條`));
+    if (group.length > 1) tags.appendChild(el('span', 'tag merged', t('tagMerged', { n: group.length })));
     const licenceIds = new Set();
     const attributeIds = new Set();
     for (const control of group) {
       for (const id of control.applicability.licenses) if (state.licenses.has(id)) licenceIds.add(id);
       for (const id of control.applicability.attributes || []) if (state.attributes.has(id)) attributeIds.add(id);
-      if (control.deadline) tags.appendChild(el('span', 'tag deadline', `監管限期 ${control.deadline}`));
+      if (control.deadline) tags.appendChild(el('span', 'tag deadline', t('tagDeadline', { date: control.deadline })));
     }
     for (const id of licenceIds) {
       const item = HKCC.licenses.find(x => x.id === id);
-      if (item) tags.appendChild(el('span', 'tag', `適用：${item.label}`));
+      if (item) tags.appendChild(el('span', 'tag', t('tagApplies', { value: trLicense(item).label })));
     }
     for (const id of attributeIds) {
       const item = HKCC.attributes.find(x => x.id === id);
-      if (item) tags.appendChild(el('span', 'tag', `觸發：${item.label}`));
+      if (item) tags.appendChild(el('span', 'tag', t('tagTriggered', { value: trAttribute(item).label })));
     }
     if (tags.childNodes.length) card.appendChild(tags);
 
-    const notes = group.flatMap(c => [c.applicabilityNote, c.note]).filter(Boolean);
-    for (const noteText of [...new Set(notes)]) card.appendChild(el('p', 'control-note', `註：${noteText}`));
+    const notes = group.flatMap(c => {
+      const translated = trControl(c);
+      return [translated.applicabilityNote || c.applicabilityNote, translated.note || c.note];
+    }).filter(Boolean);
+    for (const noteText of [...new Set(notes)]) {
+      card.appendChild(el('p', 'control-note', t('notePrefix') + noteText));
+    }
     return card;
   }
 
   function renderMember(control) {
-    const source = HKCC.sources[control.sourceId];
+    const source = trSource(control.sourceId);
+    const translatedControl = trControl(control);
     const record = assessment(control.id);
     const member = el('section', 'assessment-member');
     const top = el('div', 'member-top');
     const sourceLine = el('div', 'source-line');
     sourceLine.appendChild(el('span', 'tag reg-' + regKey(source.regulator), source.regulator));
-    const link = el('a', null, source.titleZh);
+    if (source.verifiedOn) {
+      sourceLine.title = t('sourceMetaTip', { issued: source.issued, verified: source.verifiedOn });
+    }
+    const link = el('a', null, HKCC.sourceTitle(control.sourceId));
     link.href = source.url;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    sourceLine.append(link, el('span', 'clause', control.clause));
+    sourceLine.append(link, el('span', 'clause', translatedControl.clause || control.clause));
     if (source.issued && source.issued !== '—') sourceLine.appendChild(el('span', 'clause', source.issued));
     top.append(sourceLine, renderAssess(control.id));
     member.appendChild(top);
@@ -345,21 +369,21 @@
     const details = el('details', 'work-record');
     if (record.implementationNote || record.evidenceRef || record.owner || record.targetDate) details.open = true;
     const summaryText = record.implementationNote || record.evidenceRef || record.owner || record.targetDate ?
-      '評估記錄（已填寫）' : '填寫評估記錄';
+      t('recordFilled') : t('recordEmpty');
     details.appendChild(el('summary', null, summaryText));
     const grid = el('div', 'record-grid');
     grid.appendChild(recordField(control.id,
-      record.status === 'na' ? '不適用理由' : '實施說明', 'implementationNote', 'textarea', record.implementationNote,
-      '說明實施情況或判斷依據', 10000));
-    grid.appendChild(recordField(control.id, '證據引用', 'evidenceRef', 'textarea', record.evidenceRef,
-      '例如：IAM Standard v3；SEC-241', 10000));
-    grid.appendChild(recordField(control.id, '負責人', 'owner', 'text', record.owner,
-      '部門或角色', 200));
-    grid.appendChild(recordField(control.id, '目標完成日期', 'targetDate', 'date', record.targetDate));
+      record.status === 'na' ? t('naReason') : t('implementationNote'), 'implementationNote', 'textarea',
+      record.implementationNote, t('implementationPlaceholder'), 10000));
+    grid.appendChild(recordField(control.id, t('evidenceRef'), 'evidenceRef', 'textarea', record.evidenceRef,
+      t('evidencePlaceholder'), 10000));
+    grid.appendChild(recordField(control.id, t('owner'), 'owner', 'text', record.owner,
+      t('ownerPlaceholder'), 200));
+    grid.appendChild(recordField(control.id, t('targetDate'), 'targetDate', 'date', record.targetDate));
     details.appendChild(grid);
 
     const due = E.dueState(record.targetDate, state.project.asOfDate);
-    if (due) details.appendChild(el('span', `tag ${due}`, due === 'overdue' ? '已逾期' : '30 日內到期'));
+    if (due) details.appendChild(el('span', `tag ${due}`, due === 'overdue' ? t('overdue') : t('dueSoon')));
     member.appendChild(details);
     return member;
   }
@@ -377,7 +401,9 @@
         updateAssessment(id, 'status', status.id);
         render();
       });
-      label.append(input, document.createTextNode(status.label));
+      const labelText = t(status.key);
+      label.append(input, document.createTextNode(labelText));
+      label.title = labelText;
       box.appendChild(label);
     }
     return box;
@@ -404,24 +430,24 @@
     box.innerHTML = '';
     const top = el('div', 'summary-top');
     top.appendChild(el('span', 'summary-count', String(groups.length)));
-    top.appendChild(el('span', 'summary-label', '項適用要求'));
+    top.appendChild(el('span', 'summary-label', t('summaryLabel')));
     box.appendChild(top);
     const merged = active.length - groups.length;
     box.appendChild(el('div', 'summary-note', merged > 0 ?
-      `源自 ${active.length} 條監管控制，其中 ${merged} 條經跨監管合併展示。` :
-      `源自 ${active.length} 條監管控制。`));
+      t('summaryFromMerged', { total: active.length, merged }) :
+      t('summaryFrom', { total: active.length })));
 
     if (!state.storageAvailable) {
-      box.appendChild(el('div', 'storage-warning', '瀏覽器無法自動儲存。請定期使用「匯出項目」備份。'));
+      box.appendChild(el('div', 'storage-warning', t('storageWarning')));
     }
     if (Object.keys(state.unresolvedAssessments).length) {
       box.appendChild(el('div', 'storage-warning',
-        `項目保留 ${Object.keys(state.unresolvedAssessments).length} 項未識別的舊控制記錄。`));
+        t('unresolvedWarning', { n: Object.keys(state.unresolvedAssessments).length })));
     }
 
     const counts = {};
     for (const control of active) {
-      const regulator = HKCC.sources[control.sourceId].regulator;
+      const regulator = trSource(control.sourceId).regulator;
       counts[regulator] = (counts[regulator] || 0) + 1;
     }
     const regulators = el('div', 'by-reg');
@@ -437,9 +463,10 @@
       const pct = scored ? Math.round(((tally.done + tally.partial * 0.5) / scored) * 100) : 0;
       const wrap = el('div', 'progress-wrap');
       const progressHead = el('div', 'progress-head');
-      progressHead.appendChild(el('span', null, `控制實施完成度 ${pct}%`));
-      progressHead.appendChild(el('span', null,
-        `已實施 ${tally.done} · 部分 ${tally.partial} · 未實施 ${tally.gap} · 未評 ${tally.none}`));
+      progressHead.appendChild(el('span', null, t('progressLabel', { pct })));
+      progressHead.appendChild(el('span', null, t('progressTally', {
+        done: tally.done, partial: tally.partial, gap: tally.gap, none: tally.none
+      })));
       const bar = el('div', 'progress');
       for (const [cls, count] of [['done', tally.done], ['partial', tally.partial], ['gap', tally.gap]]) {
         if (!count) continue;
@@ -448,45 +475,57 @@
         bar.appendChild(segment);
       }
       wrap.append(progressHead, bar,
-        el('div', 'score-note', '部分實施按 50% 計算，只反映評估進度，不代表監管機構的合規認定。'));
+        el('div', 'score-note', t('progressDisclaimer')));
       box.appendChild(wrap);
     }
   }
 
   let currentVisibleGroups = [];
   function statusLabel(status) {
-    return STATUSES.find(item => item.id === (status || 'none'))?.label || '未評';
+    const item = STATUSES.find(entry => entry.id === (status || 'none')) || STATUSES[0];
+    return t(item.key);
   }
 
   function applicabilityText(control) {
     const licences = control.applicability.licenses
       .filter(id => state.licenses.has(id))
-      .map(id => HKCC.licenses.find(item => item.id === id)?.label)
+      .map(id => {
+        const item = HKCC.licenses.find(entry => entry.id === id);
+        return item ? trLicense(item).label : null;
+      })
       .filter(Boolean);
     const attributes = (control.applicability.attributes || [])
-      .map(id => HKCC.attributes.find(item => item.id === id)?.label)
+      .map(id => {
+        const item = HKCC.attributes.find(entry => entry.id === id);
+        return item ? trAttribute(item).label : null;
+      })
       .filter(Boolean);
-    return [...licences, ...attributes].join('；');
+    return [...licences, ...attributes].join(HKCC.locale === 'en' ? '; ' : '；');
   }
 
   function toCSV() {
-    const rows = [['項目名稱', '評估基準日期', '控制點 ID', '控制域', '控制點', '要求', '適用原因',
-      '監管機構', '出處', '條款', '發布日期', '監管限期', '原文連結', '英文來源類型', '英文來源文字',
-      '自評狀態', '實施說明／不適用理由', '證據引用', '負責人', '目標完成日期', '到期狀態']];
+    const rows = [[t('csvProjectName'), t('csvAsOfDate'), t('csvId'), t('csvDomain'), t('csvTitle'),
+      t('csvRequirement'), t('csvApplicability'), t('csvRegulator'), t('csvSource'), t('csvClause'),
+      t('csvIssued'), t('csvVerified'), t('csvDeadline'), t('csvUrl'), t('csvQuoteType'), t('csvQuote'),
+      t('csvStatus'), t('csvImplementation'), t('csvEvidence'), t('csvOwner'), t('csvTargetDate'),
+      t('csvDueState')]];
     for (const group of currentVisibleGroups) {
       for (const control of group) {
         if (state.gapsOnly && ['done', 'na'].includes(assessment(control.id).status)) continue;
-        const source = HKCC.sources[control.sourceId];
-        const domain = HKCC.domains.find(item => item.id === control.domain);
+        const source = trSource(control.sourceId);
+        const translatedControl = trControl(control);
+        const rawDomain = HKCC.domains.find(item => item.id === control.domain);
+        const domain = rawDomain ? trDomain(rawDomain) : null;
         const record = assessment(control.id);
         const due = E.dueState(record.targetDate, state.project.asOfDate);
-        const quoteType = control.quoteStatus === 'verbatim' ? '英文條文原文' :
-          control.quoteStatus === 'excerpt' ? '英文條文節錄' : control.quote ? '英文來源說明' : '';
+        const quoteType = control.quoteStatus === 'verbatim' ? t('quoteVerbatim') :
+          control.quoteStatus === 'excerpt' ? t('quoteExcerpt') : control.quote ? t('quoteSummaryType') : '';
         rows.push([state.project.name, state.project.asOfDate, control.id, domain?.label || control.domain,
-          control.title, control.requirement, applicabilityText(control), source.regulator, source.titleZh,
-          control.clause, source.issued, control.deadline || '', source.url, quoteType, control.quote || '',
+          translatedControl.title, translatedControl.requirement, applicabilityText(control), source.regulator,
+          HKCC.sourceTitle(control.sourceId), translatedControl.clause || control.clause, source.issued,
+          source.verifiedOn || '', control.deadline || '', source.url, quoteType, control.quote || '',
           statusLabel(record.status), record.implementationNote || '', record.evidenceRef || '', record.owner || '',
-          record.targetDate || '', due === 'overdue' ? '已逾期' : due === 'due-soon' ? '30 日內到期' : '']);
+          record.targetDate || '', due === 'overdue' ? t('overdue') : due === 'due-soon' ? t('dueSoon') : '']);
       }
     }
     return '\ufeff' + rows.map(row => row.map(E.csvCell).join(',')).join('\r\n');
@@ -517,31 +556,37 @@
   async function importProject(file) {
     if (!file) return;
     if (file.size > MAX_PROJECT_BYTES) {
-      alert('項目檔案超過 5 MB，未有匯入。');
+      alert(t('importTooLarge'));
       return;
     }
     let parsed;
     try {
       parsed = JSON.parse(await file.text());
     } catch (error) {
-      alert('項目檔案不是有效 JSON，現有資料未有變更。');
+      alert(t('importInvalidJson'));
       return;
     }
     const result = E.validateProject(parsed, definitions);
     if (!result.ok) {
-      alert(`項目檔案未通過檢查，現有資料未有變更：\n\n${result.errors.slice(0, 12).join('\n')}`);
+      alert(t('importValidationFailed', { errors: result.errors.slice(0, 12).join('\n') }));
       return;
     }
     const data = result.data;
     const known = Object.keys(data.assessments).length;
     const unresolved = Object.keys(data.unresolvedAssessments).length;
     const versionNote = data.controlDataVersion && data.controlDataVersion !== HKCC.meta.version ?
-      `\n控制資料版本：${data.controlDataVersion}（目前 ${HKCC.meta.version}）` :
-      `\n控制資料版本：${data.controlDataVersion || '未記錄'}`;
-    const warningText = result.warnings.length ? `\n\n注意：\n${result.warnings.slice(0, 8).join('\n')}` : '';
-    const confirmed = confirm(`匯入項目「${data.project.name || '未命名項目'}」？\n` +
-      `匯出時間：${data.exportedAt || '未記錄'}${versionNote}\n有效記錄：${known}\n未識別記錄：${unresolved}` +
-      `${warningText}\n\n確認後將取代目前項目。`);
+      t('importVersionDifferent', { imported: data.controlDataVersion, current: HKCC.meta.version }) :
+      t('importVersion', { version: data.controlDataVersion || t('notRecorded') });
+    const warningText = result.warnings.length ?
+      t('importWarnings', { warnings: result.warnings.slice(0, 8).join('\n') }) : '';
+    const confirmed = confirm(t('confirmImport', {
+      name: data.project.name || t('unnamedProject'),
+      exportedAt: data.exportedAt || t('notRecorded'),
+      versionNote,
+      known,
+      unresolved,
+      warningText
+    }));
     if (!confirmed) return;
     hydrate(data);
     save();
@@ -549,25 +594,86 @@
   }
 
   function updatePrintHeader() {
+    const separator = HKCC.locale === 'en' ? '; ' : '；';
     const licences = [...state.licenses]
-      .map(id => HKCC.licenses.find(item => item.id === id)?.label).filter(Boolean);
+      .map(id => {
+        const item = HKCC.licenses.find(entry => entry.id === id);
+        return item ? trLicense(item).label : null;
+      }).filter(Boolean);
     const attributes = [...state.attributes]
-      .map(id => HKCC.attributes.find(item => item.id === id)?.label).filter(Boolean);
-    $('#ph-project').textContent = `項目：${state.project.name || '（未命名）'}`;
-    $('#ph-scope').textContent = `牌照範圍：${licences.join('；') || '（未選擇）'}`;
-    $('#ph-attrs').textContent = `業務特徵：${attributes.join('；') || '（未選擇）'}`;
-    $('#ph-date').textContent = `評估基準日期：${state.project.asOfDate || today()}　·　` +
-      `控制資料 v${HKCC.meta.version}　·　條文核驗日期：${HKCC.meta.verifiedOn}`;
+      .map(id => {
+        const item = HKCC.attributes.find(entry => entry.id === id);
+        return item ? trAttribute(item).label : null;
+      }).filter(Boolean);
+    $('#ph-title').textContent = t('printTitle');
+    $('#ph-project').textContent = t('phProject', { name: state.project.name || t('unnamedProject') });
+    $('#ph-scope').textContent = t('phScope') + (licences.join(separator) || t('phNone'));
+    $('#ph-attrs').textContent = t('phAttrs') + (attributes.join(separator) || t('phNone'));
+    $('#ph-date').textContent = t('phAssessmentDate', {
+      date: state.project.asOfDate || today(), version: HKCC.meta.version, verified: HKCC.verifiedOn()
+    });
+  }
+
+  function renderDomainOptions() {
+    const select = $('#domain-filter');
+    select.innerHTML = '';
+    const all = el('option', null, t('allDomains'));
+    all.value = '';
+    select.appendChild(all);
+    for (const domain of HKCC.domains) {
+      const option = el('option', null, trDomain(domain).label);
+      option.value = domain.id;
+      select.appendChild(option);
+    }
+    select.value = state.domain;
+    select.setAttribute('aria-label', t('domainFilterAria'));
+  }
+
+  function renderChrome() {
+    $('#app-title').textContent = t('appTitle');
+    $('#export-project').textContent = t('btnExportProject');
+    $('#import-project').textContent = t('btnImportProject');
+    $('#export-csv').textContent = t('btnExport');
+    $('#print').textContent = t('btnPrint');
+    $('#reset').textContent = t('btnReset');
+    const theme = $('#theme');
+    theme.textContent = t('btnTheme');
+    theme.title = t('btnThemeTitle');
+    const query = $('#q');
+    query.placeholder = t('searchPlaceholder');
+    query.setAttribute('aria-label', t('searchAria'));
+    $('#merge-label').textContent = t('optMerge');
+    $('#gaps-label').textContent = t('optGaps');
+    $('#version').textContent = t('versionLine', { version: HKCC.meta.version, date: HKCC.verifiedOn() });
+    $('#version').title = HKCC.verifiedOn() === HKCC.lastVerifiedOn() ? '' :
+      t('verifiedRangeTip', { from: HKCC.verifiedOn(), to: HKCC.lastVerifiedOn() });
+
+    const footer = $('#disclaimer');
+    footer.innerHTML = '';
+    const first = el('p');
+    first.append(el('strong', null, t('disclaimerLabel')), document.createTextNode(t('disclaimerBody')));
+    const second = el('p');
+    second.append(el('strong', null, t('langNoteLabel')), document.createTextNode(t('langNoteBody')));
+    footer.append(first, second);
+
+    for (const button of document.querySelectorAll('#lang [data-lang]')) {
+      const selected = button.dataset.lang === HKCC.locale;
+      button.classList.toggle('on', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    }
+    $('#lang').setAttribute('aria-label', t('langLabel'));
+    renderDomainOptions();
+  }
+
+  function renderAll() {
+    renderChrome();
+    render();
   }
 
   function init() {
     load();
+    HKCC.applyDocumentLocale();
     const domainFilter = $('#domain-filter');
-    for (const domain of HKCC.domains) {
-      const option = el('option', null, domain.label);
-      option.value = domain.id;
-      domainFilter.appendChild(option);
-    }
     $('#q').addEventListener('input', event => {
       state.query = event.target.value.trim();
       render();
@@ -600,7 +706,7 @@
       window.print();
     });
     $('#reset').addEventListener('click', () => {
-      if (!confirm('清除目前項目的所有選擇及評估記錄？建議先匯出項目備份。此操作無法復原。')) return;
+      if (!confirm(t('confirmReset'))) return;
       state.project = { name: '', asOfDate: today() };
       state.licenses.clear();
       state.attributes.clear();
@@ -619,8 +725,18 @@
       if (next) document.documentElement.setAttribute('data-theme', next);
       else document.documentElement.removeAttribute('data-theme');
     });
-    $('#version').textContent = `v${HKCC.meta.version} · 條文核驗於 ${HKCC.meta.verifiedOn}`;
-    render();
+
+    const language = $('#lang');
+    for (const definition of HKCC.locales) {
+      const button = el('button', 'lang-btn', definition.label);
+      button.type = 'button';
+      button.dataset.lang = definition.id;
+      button.lang = definition.html;
+      button.addEventListener('click', () => HKCC.setLocale(definition.id));
+      language.appendChild(button);
+    }
+    document.addEventListener('hkcc:localechange', renderAll);
+    renderAll();
   }
 
   document.addEventListener('DOMContentLoaded', init);
