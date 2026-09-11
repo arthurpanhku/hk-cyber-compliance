@@ -15,6 +15,20 @@
   const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   const asSet = value => value instanceof Set ? value : new Set(value || []);
 
+  /* 診斷訊息以「代碼＋參數」回傳，不在引擎內寫死任何語言的文字。
+     引擎同時服務三種語言的頁面與 Node 測試，寫死語言會讓英文使用者
+     在英文對話框裡讀到中文錯誤。文字一律由頁面經 t('diagXxx') 取用。 */
+  const DIAGNOSTIC_CODES = [
+    'diagNotObject', 'diagSchemaInvalid', 'diagSchemaTooNew', 'diagAssessmentsNotObject',
+    'diagLicensesNotArray', 'diagAttributesNotArray', 'diagProjectNameType',
+    'diagProjectNameTooLong', 'diagAsOfDateInvalid', 'diagLicenseIdType',
+    'diagAttributeIdType', 'diagRecordNotObject', 'diagStatusInvalid',
+    'diagFieldType', 'diagFieldTooLong', 'diagDateInvalid',
+    'diagUnknownLicense', 'diagUnknownAttribute', 'diagUnresolvedKept', 'diagUnresolvedRestored',
+    'diagLegacyNotObject'
+  ];
+  const diag = (code, params) => params ? { code, params } : { code };
+
   function validDate(value) {
     if (!DATE_RE.test(value || '')) return false;
     const [year, month, day] = value.split('-').map(Number);
@@ -77,7 +91,11 @@
   }
 
   function migrateV1(saved, controls) {
-    if (!isObject(saved)) throw new Error('舊版狀態不是有效物件');
+    if (!isObject(saved)) {
+      const error = new Error('legacy state is not an object');
+      error.diagnostic = diag('diagLegacyNotObject');
+      throw error;
+    }
     const licenses = Array.isArray(saved.licenses) ? saved.licenses.filter(x => typeof x === 'string') : [];
     const attributes = Array.isArray(saved.attributes) ? saved.attributes.filter(x => typeof x === 'string') : [];
     const oldAssessments = isObject(saved.assessment) ? saved.assessment : {};
@@ -155,30 +173,32 @@
   function validateProject(input, definitions) {
     const errors = [];
     const warnings = [];
-    if (!isObject(input)) return { ok: false, errors: ['項目檔案必須是 JSON 物件'], warnings };
+    if (!isObject(input)) return { ok: false, errors: [diag('diagNotObject')], warnings };
 
     let candidate = input;
     const version = Number(candidate.schemaVersion || 1);
     if (!Number.isInteger(version) || version < 1) {
-      return { ok: false, errors: ['schemaVersion 無效'], warnings };
+      return { ok: false, errors: [diag('diagSchemaInvalid')], warnings };
     }
     if (version > SCHEMA_VERSION) {
-      return { ok: false, errors: [`此項目使用較新的 schemaVersion ${version}`], warnings };
+      return { ok: false, errors: [diag('diagSchemaTooNew', { version })], warnings };
     }
     if (version < SCHEMA_VERSION) candidate = migrateProjectV1(candidate);
 
     const project = isObject(candidate.project) ? candidate.project : {};
     const scope = isObject(candidate.scope) ? candidate.scope : {};
     const rawAssessments = isObject(candidate.assessments) ? candidate.assessments : null;
-    if (!rawAssessments) errors.push('assessments 必須是物件');
-    if (!Array.isArray(scope.licenses)) errors.push('scope.licenses 必須是陣列');
-    if (!Array.isArray(scope.attributes)) errors.push('scope.attributes 必須是陣列');
+    if (!rawAssessments) errors.push(diag('diagAssessmentsNotObject'));
+    if (!Array.isArray(scope.licenses)) errors.push(diag('diagLicensesNotArray'));
+    if (!Array.isArray(scope.attributes)) errors.push(diag('diagAttributesNotArray'));
 
     const projectName = typeof project.name === 'string' ? project.name : '';
     const asOfDate = typeof project.asOfDate === 'string' ? project.asOfDate : '';
-    if (project.name != null && typeof project.name !== 'string') errors.push('project.name 必須是文字');
-    if (projectName.length > MAX_LENGTHS.projectName) errors.push('project.name 超過 200 字元');
-    if (asOfDate && !validDate(asOfDate)) errors.push('project.asOfDate 日期格式無效');
+    if (project.name != null && typeof project.name !== 'string') errors.push(diag('diagProjectNameType'));
+    if (projectName.length > MAX_LENGTHS.projectName) {
+      errors.push(diag('diagProjectNameTooLong', { max: MAX_LENGTHS.projectName }));
+    }
+    if (asOfDate && !validDate(asOfDate)) errors.push(diag('diagAsOfDateInvalid'));
 
     const controlIds = asSet(definitions.controlIds);
     const licenseIds = asSet(definitions.licenseIds);
@@ -186,26 +206,26 @@
     const licenses = [];
     const attributes = [];
     for (const id of Array.isArray(scope.licenses) ? scope.licenses : []) {
-      if (typeof id !== 'string') errors.push('牌照 ID 必須是文字');
+      if (typeof id !== 'string') errors.push(diag('diagLicenseIdType'));
       else if (licenseIds.has(id)) licenses.push(id);
-      else warnings.push(`已略過未知牌照：${id}`);
+      else warnings.push(diag('diagUnknownLicense', { id }));
     }
     for (const id of Array.isArray(scope.attributes) ? scope.attributes : []) {
-      if (typeof id !== 'string') errors.push('業務特徵 ID 必須是文字');
+      if (typeof id !== 'string') errors.push(diag('diagAttributeIdType'));
       else if (attributeIds.has(id)) attributes.push(id);
-      else warnings.push(`已略過未知業務特徵：${id}`);
+      else warnings.push(diag('diagUnknownAttribute', { id }));
     }
 
     const assessments = Object.create(null);
     const unresolvedAssessments = Object.create(null);
     const validateRecord = (id, record) => {
       if (!isObject(record)) {
-        errors.push(`控制 ${id} 的評估記錄必須是物件`);
+        errors.push(diag('diagRecordNotObject', { id }));
         return null;
       }
       const normalized = {};
       if (record.status != null && record.status !== '') {
-        if (!VALID_STATUSES.has(record.status)) errors.push(`控制 ${id} 的狀態無效`);
+        if (!VALID_STATUSES.has(record.status)) errors.push(diag('diagStatusInvalid', { id }));
         else normalized.status = record.status;
       }
       for (const [field, max] of [
@@ -214,14 +234,14 @@
         ['owner', MAX_LENGTHS.owner]
       ]) {
         if (record[field] == null || record[field] === '') continue;
-        if (typeof record[field] !== 'string') errors.push(`控制 ${id} 的 ${field} 必須是文字`);
-        else if (record[field].length > max) errors.push(`控制 ${id} 的 ${field} 過長`);
+        if (typeof record[field] !== 'string') errors.push(diag('diagFieldType', { id, field }));
+        else if (record[field].length > max) errors.push(diag('diagFieldTooLong', { id, field, max }));
         else normalized[field] = record[field];
       }
       for (const field of ['targetDate', 'assessedAt']) {
         if (record[field] == null || record[field] === '') continue;
         if (typeof record[field] !== 'string' || !validDate(record[field])) {
-          errors.push(`控制 ${id} 的 ${field} 日期格式無效`);
+          errors.push(diag('diagDateInvalid', { id, field }));
         } else normalized[field] = record[field];
       }
       return normalized;
@@ -233,7 +253,7 @@
       if (controlIds.has(id)) assessments[id] = normalized;
       else {
         unresolvedAssessments[id] = normalized;
-        warnings.push(`未識別控制已保留：${id}`);
+        warnings.push(diag('diagUnresolvedKept', { id }));
       }
     }
     if (isObject(candidate.unresolvedAssessments)) {
@@ -243,7 +263,7 @@
         if (!normalized) continue;
         if (controlIds.has(id) && !Object.prototype.hasOwnProperty.call(assessments, id)) {
           assessments[id] = normalized;
-          warnings.push(`舊控制記錄已重新識別：${id}`);
+          warnings.push(diag('diagUnresolvedRestored', { id }));
         } else if (!controlIds.has(id)) unresolvedAssessments[id] = normalized;
       }
     }
@@ -270,6 +290,7 @@
     SCHEMA_VERSION,
     VALID_STATUSES,
     MAX_LENGTHS,
+    DIAGNOSTIC_CODES,
     applies,
     cluster,
     pendingCount,

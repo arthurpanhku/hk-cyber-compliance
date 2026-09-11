@@ -5,6 +5,7 @@
   const E = window.HKCCEngine;
   const STORE_KEY = 'hkcc.state.v2';
   const LEGACY_STORE_KEY = 'hkcc.state.v1';
+  const BROKEN_STORE_KEY = 'hkcc.state.broken';
   const MAX_PROJECT_BYTES = 5 * 1024 * 1024;
   const STATUSES = [
     { id: 'none', key: 'statusUnrated', cls: 's-none' },
@@ -36,7 +37,8 @@
     gapsOnly: false,
     query: '',
     domain: '',
-    storageAvailable: true
+    storageAvailable: true,
+    quarantined: false
   };
 
   const $ = (selector, root) => (root || document).querySelector(selector);
@@ -89,12 +91,22 @@
     }
   }
 
+  /* 读不懂的本地状态先另存一份再让新状态覆盖：本地状态是用户唯一的自动保存，
+     直接覆盖等于在一次解析失败后销毁整份评估记录。备份留给手动恢复。 */
+  function quarantine(raw) {
+    try {
+      if (raw) localStorage.setItem(BROKEN_STORE_KEY, raw);
+    } catch (error) { /* 配额或隐私模式：备份不成功也不该挡住应用启动 */ }
+  }
+
   function load() {
+    let unreadableV2 = null;
     try {
       const current = localStorage.getItem(STORE_KEY);
+      unreadableV2 = current;
       if (current) {
         const result = E.validateProject(JSON.parse(current), definitions);
-        if (!result.ok) throw new Error(result.errors.join('；'));
+        if (!result.ok) throw new Error('stored project failed validation');
         hydrate(result.data);
         return;
       }
@@ -110,8 +122,34 @@
       });
       save();
     } catch (error) {
-      state.storageAvailable = false;
+      // 分辨两种失败：浏览器不让用 localStorage，与状态本身读不懂。
+      // 前者该提示「无法自动保存」，后者浏览器其实好好的，提示那句会误导。
+      if (!storageUsable()) { state.storageAvailable = false; return; }
+      // v1 迁移失败时原数据仍在 hkcc.state.v1 下，本来就不会被覆盖；
+      // 只有读不懂的 v2 需要另存，否则下一次自动保存就把它抹掉。
+      if (unreadableV2) quarantine(unreadableV2);
+      state.quarantined = true;
     }
+  }
+
+  function storageUsable() {
+    try {
+      const probe = STORE_KEY + '.probe';
+      localStorage.setItem(probe, '1');
+      localStorage.removeItem(probe);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /* 引擎回传的诊断为 { code, params }，在此译成当前语言。
+     未知代码退回显示代码本身，好过让对话框空白。 */
+  function formatDiagnostic(item) {
+    if (typeof item === 'string') return item;
+    if (!item || !item.code) return '';
+    const text = t(item.code, item.params);
+    return text === item.code ? item.code : text;
   }
 
   function assessment(id) {
@@ -264,7 +302,9 @@
       .filter(c => !['done', 'na'].includes(assessment(c.id).status))
       .map(c => assessment(c.id).targetDate || '9999-12-31')
       .sort()[0];
-    return firstDate(a).localeCompare(firstDate(b)) || a[0].title.localeCompare(b[0].title);
+    // 同日到期时按标题排序，须用当前语言的标题，否则英文界面按简体字序排列。
+    return firstDate(a).localeCompare(firstDate(b)) ||
+      trControl(a[0]).title.localeCompare(trControl(b[0]).title, HKCC.locale);
   }
 
   function emptyState(title, note) {
@@ -440,6 +480,9 @@
     if (!state.storageAvailable) {
       box.appendChild(el('div', 'storage-warning', t('storageWarning')));
     }
+    if (state.quarantined) {
+      box.appendChild(el('div', 'storage-warning', t('quarantineWarning', { key: BROKEN_STORE_KEY })));
+    }
     if (Object.keys(state.unresolvedAssessments).length) {
       box.appendChild(el('div', 'storage-warning',
         t('unresolvedWarning', { n: Object.keys(state.unresolvedAssessments).length })));
@@ -568,7 +611,9 @@
     }
     const result = E.validateProject(parsed, definitions);
     if (!result.ok) {
-      alert(t('importValidationFailed', { errors: result.errors.slice(0, 12).join('\n') }));
+      alert(t('importValidationFailed', {
+        errors: result.errors.slice(0, 12).map(formatDiagnostic).join('\n')
+      }));
       return;
     }
     const data = result.data;
@@ -578,7 +623,7 @@
       t('importVersionDifferent', { imported: data.controlDataVersion, current: HKCC.meta.version }) :
       t('importVersion', { version: data.controlDataVersion || t('notRecorded') });
     const warningText = result.warnings.length ?
-      t('importWarnings', { warnings: result.warnings.slice(0, 8).join('\n') }) : '';
+      t('importWarnings', { warnings: result.warnings.slice(0, 8).map(formatDiagnostic).join('\n') }) : '';
     const confirmed = confirm(t('confirmImport', {
       name: data.project.name || t('unnamedProject'),
       exportedAt: data.exportedAt || t('notRecorded'),
