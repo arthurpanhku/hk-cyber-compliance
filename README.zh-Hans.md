@@ -11,8 +11,8 @@
   <p>
     <a href="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml"><img src="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
-    <img src="https://img.shields.io/badge/version-1.4.0-0ea5e9" alt="Version 1.4.0">
-    <img src="https://img.shields.io/badge/控制点-102-16a34a" alt="102 controls">
+    <img src="https://img.shields.io/badge/version-1.5.0-0ea5e9" alt="Version 1.5.0">
+    <img src="https://img.shields.io/badge/控制点-135-16a34a" alt="135 controls">
     <img src="https://img.shields.io/badge/条文出处-20-64748B" alt="20 sources">
     <img src="https://img.shields.io/badge/语言-EN%20%C2%B7%20%E7%B9%81%20%C2%B7%20%E7%AE%80-7c3aed" alt="Three languages">
     <img src="https://img.shields.io/badge/零依赖-双击即用-7c3aed" alt="Zero dependency">
@@ -64,12 +64,12 @@ git clone https://github.com/arthurpanhku/hk-cyber-compliance.git
 
 ## 覆盖范围
 
-v1.4.0 共 **102 条控制点**，来自 **20 份**官方文件。每份出处各有自己的 `verifiedOn`——
+v1.5.0 共 **135 条控制点**，来自 **20 份**官方文件。每份出处各有自己的 `verifiedOn`——
 最近一次实际打开官网核对链接与版本的日期。条文发布跨 2001 至 2026 年、复核节奏各不相同，
 用一个全局日期会让刚复核过的和多年没碰的看起来一样新。页首显示的是其中**最早**的一个，
 即以最弱的一环为准；另有每周自动巡检全部链接的工作流。
 
-### 证监会 SFC（42 条）
+### 证监会 SFC（75 条）
 
 | 文件 | 日期 | 说明 |
 | --- | --- | --- |
@@ -77,6 +77,7 @@ v1.4.0 共 **102 条控制点**，来自 **20 份**官方文件。每份出处�
 | [通函 26EC35：抗钓鱼认证与可疑活动监控](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC35) | 2026-07-09 | OTP 不再获接受；passkey／设备绑定；**限期 2027-07-08** |
 | [通函 26EC32：应对 AI 驱动网络攻击](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC32) | 2026-06-02 | 资产清单、加速补丁、最小权限、微分段、不可信输入处理 |
 | 《操守准则》第 18 段及附表 7 | — | 互联网交易的上位规定 |
+| [虚拟资产交易平台营运者指引](https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/Guidelines-for-Virtual-Asset-Trading-Platform-Operators/Guidelines-for-Virtual-Asset-Trading-Platform-Operators.pdf) | 2023-06 | 第 XII 部「网络安全」全部条文 12.1–12.20，共 33 条。根据《证券及期货条例》第 399 条及《打击洗钱条例》第 53ZTK 条发布 |
 
 ### 金管局 HKMA — 认可机构（24 条）
 
@@ -130,7 +131,10 @@ v1.4.0 共 **102 条控制点**，来自 **20 份**官方文件。每份出处�
 例如把「每日离线备份」和「在严重情景下测试关键业务交付能力」合并，或把强制的 12 小时法定事故通报
 与《私隐条例》下的自愿通报合并。两者性质不同，合并会造成合规误读。
 
-在勾选全部牌照与业务特征的最大范围下，102 条条文合并为 **82 项**独立要求。
+在勾选全部牌照与业务特征的最大范围下，135 条条文合并为 **97 项**独立要求。
+平台营运者若勾选「虚拟资产服务提供者」与「互联网交易」，73 条适用条文会合并为 **44 项**——
+证监会撰写《虚拟资产交易平台营运者指引》第 XII 部时显然以《黑客入侵风险指引》为蓝本，
+大部分是同一项要求写了两遍，合并正是为了不让清单虚胖。
 
 > **部署注意**：仓库根目录的 `.nojekyll` 不可删除。GitHub Pages 默认以 Jekyll 处理站点，
 > 而 Jekyll 会忽略以下划线开头的路径，导致 `data/_registry.js` 返回 404、整个应用无法启动。
@@ -180,6 +184,7 @@ data/
 └── controls/
     ├── sfc-internet-trading.js    SFC 黑客风险指引 20 项 + 操守准则
     ├── sfc-circulars-2026.js      SFC 2026 年两份通函
+    ├── sfc-vatp.js                虚拟资产交易平台指引第 XII 部（网络安全）
     ├── hkma.js                    TM-G-1 / TM-E-1 / TM-C-1 / OR-2 / SA-2 / C-RAF
     ├── svf.js                     储值支付工具指引与实务备考
     ├── pdpo.js                    六项保障资料原则
@@ -210,11 +215,6 @@ data/
 **保险业监管局（IA）的网络安全指引尚未纳入。** `ia.org.hk` 全站启用了 Cloudflare 机器人验证，
 自动化工具无法取得原文 PDF。本项目不接受凭记忆撰写的条文，因此在取得官方原文前不会加入 IA 相关控制点，
 牌照选项中亦暂未列出保险中介人／授权保险人。欢迎以 PR 形式补充（请附官方 PDF 出处与条款编号）。
-
-**《虚拟资产交易平台营运者指引》尚未拆解为控制点。** 该指引已登记在 `data/sources.js`
-（`sfc-vatp-guidelines`，标记为 `status: 'ref'`），但目前**没有任何控制点引用它**。
-换言之，勾选「SFC 持牌虚拟资产服务提供者／交易平台」只会得到互联网交易与 2026 年通函那几套要求，
-不包括该指引自身对平台营运者的条文。这是一个已知的覆盖缺口，不是判断为「不适用」。
 
 **条文是否仍现行有效，最终由使用者自行核对。** 每份出处的 `verifiedOn` 记录的是某一天
 有人实际打开官网核对过，不是持续监控；监管机构随时可能修订或撤回条文。

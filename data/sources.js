@@ -200,10 +200,10 @@ HKCC.addSources({
     regulator: 'SFC',
     titleEn: 'Guidelines for Virtual Asset Trading Platform Operators',
     titleZh: '《虚拟资产交易平台营运者指引》',
-    issued: '—',
-    legalStatus: '证监会指引',
+    issued: '2023-06',
+    legalStatus: '根据《证券及期货条例》第 399 条及《打击洗钱及恐怖分子资金筹集条例》第 53ZTK 条发布的指引；适用于所有平台营运者。不遵从本身不会令任何人负上法律责任，但在《证券及期货条例》／《打击洗钱条例》的法律程序中可获接纳为证据，证监会亦会考虑该不遵从是否反映其不再是适当人选',
     url: 'https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/Guidelines-for-Virtual-Asset-Trading-Platform-Operators/Guidelines-for-Virtual-Asset-Trading-Platform-Operators.pdf',
-    verifiedOn: '2026-09-08',
-    status: 'ref'
+    verifiedOn: '2026-09-11',
+    status: 'current'
   }
 });
