@@ -73,6 +73,12 @@ python3 tools/gen-hant.py
 3. **新增控制点必须同时补 `en.js`。** 否则校验失败（繁体层由脚本生成，不需要手动补）。
 4. 繁体的个别字形若不合香港监管文件的写法，请改 `tools/gen-hant.py` 的 `OVERRIDES` 表并重新生成，
    不要直接改生成结果。
+5. **`js/engine.js` 里不写任何一种语言的面向用户文字。** 引擎同时服务三种语言的页面与
+   Node 测试，写死一种语言就会让另外两种语言的使用者在对话框里读到外语。
+   检查结果一律以 `diag('diagXxx', { … })` 回传代码与参数，代码登记在
+   `DIAGNOSTIC_CODES`，文字写在 `data/i18n/zh-Hans.js` 与 `en.js`，
+   由页面的 `formatDiagnostic()` 经 `t()` 取用。校验器会确认每个代码都已登记、
+   且三种语言都有文案——漏了文案对话框会直接显示 `diagXxx`。
 
 ## 关于交叉引用（`crossRefs`）
 

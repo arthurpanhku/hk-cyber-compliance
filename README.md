@@ -228,6 +228,19 @@ does not accept provisions written from memory, so no IA controls will be added 
 be obtained, and insurance intermediaries / authorized insurers are not yet listed among the licence
 options. Pull requests welcome — please cite the official PDF and clause numbers.
 
+**The Guidelines for Virtual Asset Trading Platform Operators have not been broken down into controls.**
+The document is registered in `data/sources.js` (`sfc-vatp-guidelines`, marked `status: 'ref'`), but **no
+control currently cites it**. Ticking "SFC-licensed virtual asset service provider / trading platform"
+therefore yields the internet-trading and 2026-circular requirements only, not the platform-specific
+provisions of the Guidelines themselves. This is a known coverage gap, not a finding that those provisions
+do not apply.
+
+**Whether a provision is still in force is ultimately yours to check.** Each source's `verifiedOn` records
+the day someone actually opened the regulator's site and checked it — it is not continuous monitoring, and
+regulators amend or withdraw documents at any time. Before relying on this tool's output for anything
+official, follow the link on each control card back to the regulator's own site and check the current
+version. That is precisely why every control is required to carry its source and clause number.
+
 ## Contributing
 
 Additions, corrections and regulatory updates are welcome. Before submitting, run the validator:

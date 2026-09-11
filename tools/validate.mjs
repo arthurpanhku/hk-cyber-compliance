@@ -148,6 +148,29 @@ for (const path of ['js/engine.js', 'js/i18n.js', 'js/app.js']) {
     errors.push(`${path}: 不得在运行时读取本地数据，否则 file:// 模式会失效`);
   }
 }
+
+/* ---------- 引擎诊断的文案完整性 ----------
+   引擎同时服务三种语言的页面与 Node 测试，故只回传代码与参数。
+   代码没有对应文案时，导入失败的对话框会直接显示 diagXxx，
+   所以每个代码在每种语言都须有文案——包括基础语言 zh-Hans。 */
+const engineCode = readFileSync(join(root, 'js/engine.js'), 'utf8');
+const codeBlock = engineCode.match(/const DIAGNOSTIC_CODES = \[([\s\S]*?)\];/);
+if (!codeBlock) {
+  errors.push('js/engine.js: 找不到 DIAGNOSTIC_CODES 清单');
+} else {
+  const declared = [...codeBlock[1].matchAll(/'([^']+)'/g)].map(m => m[1]);
+  const used = [...engineCode.matchAll(/\bdiag\('([^']+)'/g)].map(m => m[1]);
+  for (const code of new Set(used)) {
+    if (!declared.includes(code)) errors.push(`js/engine.js: 诊断代码 "${code}" 未列入 DIAGNOSTIC_CODES`);
+  }
+  for (const code of declared) {
+    if (!used.includes(code)) warn.push(`js/engine.js: 诊断代码 "${code}" 已列出但未使用`);
+    for (const loc of [HKCC.baseLocale, ...TRANSLATED]) {
+      if (!HKCC.i18n[loc]?.ui?.[code]) errors.push(`${loc}: 缺少诊断文案 "${code}"`);
+    }
+  }
+}
+
 const html = readFileSync(join(root, 'index.html'), 'utf8');
 if (/type=["']module["']/.test(html)) errors.push('index.html: 不得使用 ES module，须保持 file:// 兼容');
 if (!html.includes('<script src="js/engine.js"></script>')) errors.push('index.html: 缺少 js/engine.js');

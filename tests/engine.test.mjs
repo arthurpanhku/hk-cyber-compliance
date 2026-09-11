@@ -132,3 +132,47 @@ test('legacy project files migrate explicitly', () => {
   assert.equal(result.data.schemaVersion, 2);
   assert.equal(result.data.assessments.A.status, 'done');
 });
+
+/* 诊断以代码回传，页面才能按当前语言显示。
+   引擎里写死任何一种语言，都会让另外两种语言的使用者在对话框里读到外语。 */
+test('diagnostics carry language-neutral codes, never prose', () => {
+  const result = E.validateProject({
+    schemaVersion: 2,
+    project: { name: 'Test', asOfDate: 'not-a-date' },
+    scope: { licenses: ['l1', 'gone'], attributes: [] },
+    assessments: { A: { status: 'nonsense' }, GHOST: { status: 'done' } }
+  }, definitions);
+
+  assert.equal(result.ok, false);
+  for (const item of [...result.errors, ...result.warnings]) {
+    assert.equal(typeof item, 'object', '诊断必须是 { code, params } 而非字符串');
+    assert.ok(E.DIAGNOSTIC_CODES.includes(item.code), `未登记的诊断代码 ${item.code}`);
+    assert.ok(!/[一-鿿]/.test(JSON.stringify(item.code)), '诊断代码不得含中文');
+  }
+  assert.ok(result.errors.some(e => e.code === 'diagAsOfDateInvalid'));
+  assert.ok(result.errors.some(e => e.code === 'diagStatusInvalid' && e.params.id === 'A'));
+});
+
+test('a too-new schema reports its version as a parameter', () => {
+  const result = E.validateProject({ schemaVersion: 99 }, definitions);
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.errors, [{ code: 'diagSchemaTooNew', params: { version: 99 } }]);
+});
+
+test('unknown scope entries warn by code and are dropped', () => {
+  const result = E.validateProject({
+    schemaVersion: 2,
+    project: { name: 'Test', asOfDate: '2026-09-09' },
+    scope: { licenses: ['l1', 'gone'], attributes: ['a1', 'vanished'] },
+    assessments: {}
+  }, definitions);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.data.scope, { licenses: ['l1'], attributes: ['a1'] });
+  assert.deepEqual(result.warnings.map(w => w.code).sort(),
+    ['diagUnknownAttribute', 'diagUnknownLicense']);
+});
+
+test('migrateV1 rejects non-objects with a coded diagnostic', () => {
+  assert.throws(() => E.migrateV1('not an object', controls),
+    error => error.diagnostic?.code === 'diagLegacyNotObject');
+});
