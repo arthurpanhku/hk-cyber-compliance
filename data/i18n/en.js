@@ -647,6 +647,141 @@ HKCC.addI18n('en', {
       title: 'Data breach handling and notification',
       requirement: 'Establish procedures for handling data breach incidents. Note that the Personal Data (Privacy) Ordinance currently imposes no mandatory data breach notification obligation — notifying the PCPD and affected data subjects is voluntary, though it is good practice. Where the organisation is also subject to another regime — for example as a designated critical infrastructure operator, an SFC licensed corporation or an HKMA authorized institution — the mandatory notification deadlines under that regime still apply and must be observed.',
       note: 'The “voluntary notification” statement reflects the legal position as verified on 2026-09-08. If the Ordinance is later amended to introduce mandatory notification, this must be updated.'
+    },
+    'SFC-VATP-12.1': {
+      title: 'Platform (including trading system and custody infrastructure) properly designed and operated',
+      requirement: 'Ensure that the platform — including the trading system and custody infrastructure — is properly designed and operated in compliance with all applicable laws and regulations, and that all systems and processes underpinning its operation are robust and properly maintained, so that the risk of theft, fraud and other dishonest acts, professional misconduct, errors and omissions, interruptions and other operational or control failures is minimised and appropriately managed.'
+    },
+    'SFC-VATP-12.2': {
+      title: 'Robust governance arrangements and adequate human, technology and financial resources',
+      requirement: 'Put robust governance arrangements in place for overseeing the operation of the platform, and make available adequate human, technology and financial resources to ensure the platform is operated properly.'
+    },
+    'SFC-VATP-12.3': {
+      title: 'Written internal policies, key man risk, and responsible officer accountability for cybersecurity',
+      requirement: 'Establish and implement written internal policies and procedures for the design, development, deployment, operation and modification of the platform, ensuring that: (a) key personnel hold the necessary professional qualifications, management and technical experience, and that key personnel (such as the founder or chief developer) are identified with plans to mitigate the associated key man risks; (b) at least one responsible officer is accountable for the overall management and supervision of the platform and for defining a cybersecurity management framework and key roles and responsibilities — including approving policies and procedures, approving budget and spending, arranging a periodic technology audit (paragraph 12.7) and independent cybersecurity assessment (paragraph 12.13), reviewing significant issues from emergencies, disruptions and cybersecurity incidents, reviewing major audit and cybersecurity review findings and endorsing and monitoring remedial actions, monitoring and assessing cyber threats (including maintaining up-to-date knowledge of the threat landscape, gathering threat intelligence and performing regular automated vulnerability scans), approving the contingency plan, and approving third-party due diligence, service level agreements and contracts. These responsibilities may be delegated in writing to a designated committee or operational unit, but overall accountability remains with the responsible officer(s); (c) there is a formalised governance process with input from the dealing, risk and compliance functions; (d) reporting lines are clearly identified; and (e) managerial and supervisory controls are in place.',
+      note: 'The Guidelines state expressly that the requirement to perform vulnerability scans regularly with automated tools does not include performing penetration tests based on attack simulations.'
+    },
+    'SFC-VATP-12.4': {
+      title: 'Regularly review internal policies and promptly remedy deficiencies',
+      requirement: 'Conduct regular reviews to ensure these internal policies and procedures are in line with changing market conditions, the cyber threat landscape and regulatory developments, and promptly remedy any deficiencies identified.'
+    },
+    'SFC-VATP-12.5': {
+      title: 'Assign qualified staff and resources across the platform lifecycle',
+      requirement: 'Assign adequately qualified staff, expertise, technology and financial resources to the design, development, deployment, operation and modification of the platform.'
+    },
+    'SFC-VATP-12.6': {
+      title: 'Third-party service provider due diligence, ongoing monitoring and service level agreement',
+      requirement: 'Where the platform or any associated activity is provided by or outsourced to a third party service provider, perform appropriate due diligence, conduct ongoing monitoring and make arrangements ensuring the Platform Operator still meets the requirements of these Guidelines (including Part XII and Part XIV on record keeping). In particular, the Platform Operator or its Associated Entity should enter into a formal service-level agreement specifying the terms of services and the provider’s responsibilities, reviewed regularly and revised to reflect changes to the services, outsourcing arrangements or regulatory developments. Whenever possible such agreements should provide sufficient levels of maintenance and technical assistance with quantitative details.'
+    },
+    'SFC-VATP-12.7': {
+      title: 'Periodic (at least annual) technology audit by an independent professional',
+      requirement: 'Arrange a periodic (at least annual) technology audit by a suitably qualified independent professional so as to be satisfied that the Platform Operator and its Associated Entity have fully complied with Part XII of the Guidelines. Exercise due skill, care and diligence in selecting and appointing the independent professional, having regard to their experience and track record in reviewing virtual asset related technology, and take prompt rectification measures — and ensure the Associated Entity does so — upon identifying any non-compliance.'
+    },
+    'SFC-VATP-12.8': {
+      title: 'Ensure platform integrity, reliability, security and capacity, with contingency measures',
+      requirement: 'Ensure the integrity of the platform, maintain a high degree of reliability, security and capacity in respect of its systems, and have appropriate contingency measures in place.'
+    },
+    'SFC-VATP-12.9': {
+      title: 'Written standard operating procedures for system upgrades and maintenance',
+      requirement: 'Have written standard operating procedures (SOP) for performing system upgrades and maintenance, containing: (a) the methods of communication and how pending orders still in the order book are dealt with; (b) how long orders can be entered, amended or cancelled after a system downtime and before continuous trading resumes; and (c) the process applicable to unexpected and unplanned system failures which affect an orderly market.'
+    },
+    'SFC-VATP-12.10': {
+      title: 'Pre-deployment testing, senior management sign-off, full backup and rollback plan',
+      requirement: 'Ensure the platform and all modifications to it — such as implementing a new system or upgrading an existing one — are tested before deployment and regularly reviewed. Before deployment, at least: (a) review and sign off on the test results at senior management level; (b) fully back up the system and data; and (c) devise a contingency plan to switch back to the previous version in the event of critical and unrecoverable errors in the new version. Maintain a clear audit trail for all modifications made to the platform.'
+    },
+    'SFC-VATP-12.11': {
+      title: 'Inform clients of planned outages as far in advance as practicable',
+      requirement: 'Where outages are planned to perform updates and testing of platforms or systems, inform clients as far in advance as practicable if such outages may affect them.'
+    },
+    'SFC-VATP-12.12a': {
+      title: 'Need-to-have staff access, unique user authentication, annual access review and access logs',
+      requirement: 'Employ robust authentication and authorisation methods and technology so that access to the platform is restricted to authorised persons on a need-to-have basis. Specifically: (i) permit staff access to trading information only to the extent necessary for the platform to operate properly and efficiently, keeping senior management informed at all times of each such staff member (by title and department), the information accessible, the basis for that access and any change and its basis; (ii) adopt an appropriate user authentication method enabling each user to be uniquely identified; (iii) review the user access list of the platform and databases at least yearly and revoke unnecessary access and privileges (for example for departed staff) on a timely basis; (iv) maintain an adequate access log recording identity and role, information accessed, time of access, any approval given and the basis for it, with adequate protection against tampering or erasure; and (v) have adequate and effective policies, systems and controls to guard against and detect errors, omissions, unauthorised insertion, alteration or deletion of data (including client and trading information), information leakage or abuse by staff.'
+    },
+    'SFC-VATP-12.12b': {
+      title: 'Two-factor authentication for login to clients’ accounts',
+      requirement: 'Implement two-factor authentication for login to clients’ accounts. The Guidelines define two-factor authentication as an authentication mechanism which utilises any two of the following factors: what a client knows, what a client has, and who a client is.'
+    },
+    'SFC-VATP-12.12c': {
+      title: 'Secure generation and delivery of client login passwords',
+      requirement: 'Have effective policies and procedures ensuring a client login password is generated and delivered securely during account activation and password reset. The password should be randomly generated by the system and sent through a channel of communication free from human intervention and from tampering by the Platform Operator’s staff. Where the password is not randomly generated by the system, implement adequate compensating security controls such as a compulsory password change upon first login after account activation.'
+    },
+    'SFC-VATP-12.12d': {
+      title: 'Stringent password policies and session timeout controls',
+      requirement: 'Apply stringent password policies and session timeout controls on the platform, including: (i) minimum password length; (ii) periodic reminders for clients who have not changed their passwords for a long period; (iii) minimum password complexity (ie, alphanumeric) and history; (iv) avoidance of passwords containing values known to be commonly-used, expected or compromised; (v) appropriate controls on invalid login attempts; and (vi) session timeout after a period of inactivity.'
+    },
+    'SFC-VATP-12.12e': {
+      title: 'Prompt client notification of account activities, on a different channel from login',
+      requirement: 'Notify clients promptly after certain activities have taken place in their accounts, at least: (i) system login; (ii) password reset; (iii) trade execution; and (iv) changes to client and account-related information. The notification channel should be different from the one used for system login. Clients may opt out of “trade execution” notifications only; where they do, except when dealing with institutional and qualified corporate professional investors, adequate risk disclosures should be provided and an acknowledgement executed by the client confirming they understand the risks involved.'
+    },
+    'SFC-VATP-12.12f-i': {
+      title: 'Secure network infrastructure through network segmentation (DMZ with multi-tiered firewalls)',
+      requirement: 'Deploy a secure network infrastructure through proper network segmentation — a Demilitarised Zone (DMZ) with multi-tiered firewalls — to protect critical systems and client data against cyber-attacks.'
+    },
+    'SFC-VATP-12.12f-ii': {
+      title: 'Need-to-have access to the internal network and its segments, including remote access',
+      requirement: 'Grant access, including remote access, to the internal network and its different segments on a need-to-have basis, and implement security controls over such access.'
+    },
+    'SFC-VATP-12.12f-iii': {
+      title: 'Patch management: deploy within one month following completion of testing',
+      requirement: 'Monitor and evaluate security patches or hotfixes released by software providers on a timely basis and, subject to an evaluation of the impact, conduct testing as soon as practicable and implement the security patches or hotfixes within one month following the completion of testing.'
+    },
+    'SFC-VATP-12.12f-iv': {
+      title: 'Anti-virus, anti-malware and endpoint detection and response (EDR)',
+      requirement: 'Implement and update anti-virus and anti-malware solutions as well as endpoint detection and response technology on a timely basis to detect malicious applications and malware on critical system servers and workstations.'
+    },
+    'SFC-VATP-12.12f-v': {
+      title: 'IPS, IDS and SIEM for real-time intrusion detection and alerting',
+      requirement: 'Implement Intrusion Prevention System (IPS), Intrusion Detection System (IDS) and Security Information and Event Management (SIEM) solutions to detect and generate alerts on any intrusion or unauthorised access to critical system servers and workstations on a real time basis.',
+      note: 'The Guidelines state that the detection rules of the endpoint detection and response technology and SIEM solutions should be updated as and when necessary, such as when new attack or threat scenarios require additional detection rules.'
+    },
+    'SFC-VATP-12.12f-vi': {
+      title: 'Establish a Security Operations Center (SOC) or equivalent function',
+      requirement: 'Establish a Security Operations Center (SOC) or equivalent function with sufficient resources to take charge of all security monitoring processes and technologies and to act as coordinator for efficient incident detection and handling.'
+    },
+    'SFC-VATP-12.12f-vii': {
+      title: 'Prevent unauthorised installation of hardware and software; control storage media',
+      requirement: 'Implement security controls to prevent unauthorised installation of hardware and software, and ensure that only authorised storage media and devices are used to store and transfer critical data.'
+    },
+    'SFC-VATP-12.12f-viii': {
+      title: 'Physical security of critical platform components including the HSM',
+      requirement: 'Establish physical security policies and procedures to protect critical platform components — for example the HSM, the authorised storage media and devices used to store and transfer critical data, system servers and network devices — in a secure environment, and to prevent unauthorised physical access to the facilities hosting the platform and those components. Where applicable, apply segregation of duty or privilege separation to access to critical platform components.'
+    },
+    'SFC-VATP-12.12g': {
+      title: 'Up-to-date encryption and secure transfer, including of backup copies',
+      requirement: 'Use up-to-date data encryption and secure transfer technology, in accordance with industry best practices and international standards, to protect the confidentiality and integrity and assure source authenticity of information stored on the platform and during transmission between internal and external networks. In particular, use a strong encryption algorithm to: (i) encrypt sensitive information such as client login credentials (ie, user ID and password) and trade data during transmission between internal networks and client devices; (ii) protect client login passwords stored on the platform; (iii) protect critical data transferred between components of the system infrastructure; and (iv) protect the backup copies of the platform’s critical data.'
+    },
+    'SFC-VATP-12.12h': {
+      title: 'Security tools to block intrusion attempts and monitoring for unauthorised account access',
+      requirement: 'Use up-to-date security tools to detect, prevent and block any potential unauthorised intrusion, security breach and cyberattack attempts. In particular, implement an effective monitoring and surveillance mechanism to detect unauthorised access to clients accounts or the Platform Operator’s accounts (if any).'
+    },
+    'SFC-VATP-12.12i': {
+      title: 'Yearly staff training and regular client alerts and educational materials',
+      requirement: 'Provide adequate internal procedures and training for staff at least on a yearly basis, and regular alerts and educational materials for clients, to raise awareness of the importance of cybersecurity and the need to strictly observe security measures when using the platform.'
+    },
+    'SFC-VATP-12.13': {
+      title: 'Independent cybersecurity assessment covering wallet security and custody system source code review',
+      requirement: 'Perform a stringent independent cybersecurity assessment before the launch of the platform or the deployment of modifications to it, and periodically thereafter. The scope should at least cover: (a) user application security (ie, desktop/web-based/mobile app); (b) wallet security; (c) physical security; and (d) network and system security, including penetration testing, source code review of the custody system and other systems which interface or connect with it, and vulnerability scanning. Maintain sufficient documentation on the assessment, including the testing scope and methodology and the assessment results.',
+      note: 'For the source code review: the assessment prior to launch and the ongoing periodic assessments must be performed by an independent third party, whereas the review for modifications prior to deployment may be performed either by an independent third party or by the Platform Operator itself. If no changes have been made to the custody system or connected systems since launch, no source code review needs to be performed.'
+    },
+    'SFC-VATP-12.14': {
+      title: 'Written escalation procedures for cybersecurity incidents, internally and externally',
+      requirement: 'Establish written policies and procedures specifying the manner in which a suspected or actual cybersecurity incident should be escalated internally and externally — for example to clients, the SFC and other regulatory authorities, where appropriate.'
+    },
+    'SFC-VATP-12.15': {
+      title: 'Capacity monitoring, stress testing and contingency arrangements when capacity is exceeded',
+      requirement: 'Ensure that: (a) usage capacity is regularly monitored and appropriate capacity planning is developed, determining and recording the required level of spare capacity; (b) capacity is regularly stress tested to establish system behaviour under different simulated market conditions, with results and remedial actions documented; (c) the platform has sufficient capacity to handle any foreseeable increase in business volume and market turnover; and (d) contingency arrangements exist to handle clients’ orders when capacity is exceeded and to inform clients of those arrangements, ensuring alternative means of executing orders are available and offered.'
+    },
+    'SFC-VATP-12.16': {
+      title: 'Daily offline backup, with availability and integrity of backup copies assured',
+      requirement: 'Back up business records, client and transaction databases, servers and supporting documentation in an offline medium at least on a daily basis. Off-site storage is generally expected to be subject to proper security measures. Implement proper measures to ensure the availability and integrity of the backup copies.'
+    },
+    'SFC-VATP-12.17': {
+      title: 'Written contingency plan covering cyber-attack scenarios, backup facility and yearly testing',
+      requirement: 'Identify and manage the associated risks — including any unintended consequences — prudently, with appropriate contingency arrangements including a written contingency plan to cope with emergencies and disruptions (including cybersecurity situations) related to the platform, checking and ensuring data integrity after system recovery and ensuring trading can be conducted fairly and in an orderly manner after resumption. The plan should at least include: (a) the potential disruptive scenarios, including cyber-attack scenarios such as distributed denial-of-service attacks and total loss of business records and client data resulting from cyber-attacks, and the corresponding activation procedures; (b) a suitable backup facility enabling continued trading services or alternative order execution arrangements in an emergency; and (c) the availability of trained staff to deal with clients’ and regulators’ enquiries. The backup facility and the contingency plan should be reviewed, updated and tested for viability and adequacy at least yearly.'
+    },
+    'SFC-VATP-12.20': {
+      title: 'Material system delay or failure: rectify promptly and inform clients',
+      requirement: 'In the event of material system delay or failure, in a timely manner: (a) rectify the situation; and (b) inform clients about the situation as soon as practicable and how their pending orders, deposits and withdrawals will be handled.'
     }
   }
 });
