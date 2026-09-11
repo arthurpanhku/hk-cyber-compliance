@@ -1,0 +1,58 @@
+name: 取回条文原文
+
+# 撰写控制点必须逐字对照官方原文（见 CONTRIBUTING），但受限的开发环境
+# 往往连不上监管机构网站：www.sfc.hk、brdr.hkma.gov.hk、occics.gov.hk
+# 在代理后常被整域拦掉。runner 没有这个限制（已实测 20 份出处全部可达），
+# 所以取文这一步放到这里跑。
+#
+# 结果同时写进两个地方：
+#   - 作业日志：不需要额外出网就能读到，适合直接对照撰写
+#   - 构建产物：完整全文，保留 14 天
+#
+# 取回的原文**不提交进仓库**——版权属于各监管机构，本项目只以结构化形式
+# 引述条文并链接官方出处。
+on:
+  workflow_dispatch:
+    inputs:
+      sourceId:
+        description: 'data/sources.js 中的出处 ID（如 sfc-vatp-guidelines）'
+        required: true
+        type: string
+      pages:
+        description: 'PDF 页码范围，如 1-20；留空取全文'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    name: 取回并转为纯文本
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      # pdftotext。ubuntu-latest 不保证预装，显式安装。
+      - name: 安装 poppler-utils
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+
+      # 输入经环境变量传入，不直接插进 run: 的命令行——
+      # ${{ inputs.* }} 会在 shell 解析前原样展开，拼进命令即是注入面。
+      # 出处 ID 是否合法由脚本自己对 data/sources.js 校验。
+      - name: node tools/fetch-source.mjs
+        env:
+          SOURCE_ID: ${{ inputs.sourceId }}
+          PAGES: ${{ inputs.pages }}
+        run: node tools/fetch-source.mjs "$SOURCE_ID" "$PAGES"
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: source-text
+          path: out/
+          retention-days: 14

@@ -17,11 +17,11 @@ jobs:
     name: 巡检 20 份出处的官方链接
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
 
       # 只有确定失效（404 / 410 / 域名解析不了）才会失败。
       # 403 / 429 多为机器人防护，5xx 与超时多为暂时性故障，只报告不失败——
