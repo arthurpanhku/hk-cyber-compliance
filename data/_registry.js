@@ -8,7 +8,7 @@
  * 注入 HKCC.i18n。查字段一律走 HKCC.tr()／HKCC.t()，不要直接读 obj.label。
  */
 window.HKCC = {
-  meta: { version: '1.5.0' },
+  meta: { version: '1.6.0' },
 
   /** 基础数据的撰写语言：这些字段本身即 zh-Hans，无需覆盖层。 */
   baseLocale: 'zh-Hans',

@@ -193,6 +193,7 @@ HKCC.addI18n('en', {
     identity: { label: 'Authentication & access control', desc: 'Client authentication, password policy, entitlement management, privileged accounts' },
     protect: { label: 'System & network hardening', desc: 'Network segmentation, patching, endpoint protection, physical security' },
     data: { label: 'Data protection & encryption', desc: 'Encryption in transit and at rest, protection of sensitive information' },
+    custody: { label: 'Virtual asset custody & key management', desc: 'Cold/hot wallet segregation, generation, storage and backup of seeds and private keys, and access to them' },
     detect: { label: 'Monitoring, detection & alerting', desc: 'Abnormal transaction monitoring, logging, threat intelligence, client notification' },
     respond: { label: 'Incident response & regulatory reporting', desc: 'Incident handling procedures, reporting deadlines, root cause analysis' },
     resilience: { label: 'Backup, resilience & business continuity', desc: 'Backup, disaster recovery, operational resilience, tolerance setting' },
@@ -782,6 +783,76 @@ HKCC.addI18n('en', {
     'SFC-VATP-12.20': {
       title: 'Material system delay or failure: rectify promptly and inform clients',
       requirement: 'In the event of material system delay or failure, in a timely manner: (a) rectify the situation; and (b) inform clients about the situation as soon as practicable and how their pending orders, deposits and withdrawals will be handled.'
+    },
+    'SFC-VATP-10.6c': {
+      title: '98% of client virtual assets to be held in cold storage',
+      requirement: 'Store 98% of client virtual assets in cold storage — such as Hardware Security Module (HSM)-based cold storage — to minimise exposure to losses arising from a compromise or hacking of the platform, except under limited circumstances permitted by the SFC on a case-by-case basis. The Associated Entity is subject to the same requirement.'
+    },
+    'SFC-VATP-10.6d': {
+      title: 'Minimise transactions out of cold storage',
+      requirement: 'The Platform Operator and its Associated Entity should minimise transactions out of the cold storage in which a majority of client virtual assets are held.'
+    },
+    'SFC-VATP-10.6e': {
+      title: 'Detailed specifications for authorising access to cryptographic devices',
+      requirement: 'Have detailed specifications for how access to cryptographic devices or applications is to be authorised and validated, covering key generation, distribution, storage, use and destruction. The Associated Entity is subject to the same requirement.'
+    },
+    'SFC-VATP-10.6f': {
+      title: 'Document the hot/cold storage transfer mechanism and each function’s authority',
+      requirement: 'Document in detail the mechanism for transferring virtual assets between hot, cold and other storages, and clearly specify the scope of authority of each function designated to perform any non-automated process in such transfers.'
+    },
+    'SFC-VATP-10.6g': {
+      title: 'Procedures for voting, hard forks and airdrops',
+      requirement: 'Have detailed procedures for how to deal with events such as voting, hard forks or airdrops from an operational and technical point of view.'
+    },
+    'SFC-VATP-10.7': {
+      title: 'Deposits and withdrawals only through whitelisted client wallet addresses',
+      requirement: 'Do not conduct deposits or withdrawals of client virtual assets through any wallet address other than an address which belongs to the client and is whitelisted by the Platform Operator, except under permitted circumstances specified by the SFC. Ensure the Associated Entity complies with the same requirement.'
+    },
+    'SFC-VATP-10.8a': {
+      title: 'Seeds and private keys generated non-deterministically, offline and in an HSM where practicable',
+      requirement: 'Generated seeds and private keys must be sufficiently resistant to speculation or collusion, and should be generated in accordance with applicable international security standards and industry best practices so that seeds (where Hierarchical Deterministic Wallets or similar processes are used) or private keys (if seeds are not used) are generated in a non-deterministic manner ensuring randomness and are thus not reproducible. Where practicable, seeds and private keys should be generated offline and kept in a secure environment such as an HSM with appropriate certification, for the lifetime of the seeds or private keys.'
+    },
+    'SFC-VATP-10.8b': {
+      title: 'Authorisation, validation, multi-factor authentication and immediate revocation for key access',
+      requirement: 'Maintain detailed specifications for how access to cryptographic devices or applications is authorised and validated — covering key generation, distribution, use, storage and destruction — as well as the immediate revocation of a signatory’s access as required. Where practicable, use multi-factor authentication to authenticate authorised personnel for access to applications governing the use of private keys.'
+    },
+    'SFC-VATP-10.8c': {
+      title: 'Key access restricted to screened personnel, with no single person holding the entirety',
+      requirement: 'Tightly restrict access to seeds and private keys relating to client virtual assets to authorised personnel who have undergone appropriate screening and training. No single person may have possession of information on, or access to, the entirety of the seeds, private keys or backup passphrases, and controls must be implemented to mitigate the risk of collusion amongst authorised personnel.'
+    },
+    'SFC-VATP-10.8d': {
+      title: 'Distributed backups of seeds and private keys, not reconstructable from one location',
+      requirement: 'Keep distributed backups of seeds or private keys to mitigate any single point of failure, distributed such that an event affecting the primary location does not affect the backups. Backups should be stored in a protected form on external media (preferably an HSM with appropriate certification), and stored so that seeds or private keys cannot be re-generated based solely on the backups held in the same physical location. Access control to the backups must be as stringent as access control to the original seeds or private keys.'
+    },
+    'SFC-VATP-10.8e': {
+      title: 'Seeds and private keys securely stored in Hong Kong',
+      requirement: 'Seeds and private keys are securely stored in Hong Kong.'
+    },
+    'SFC-VATP-10.9': {
+      title: 'Storage risk assessment, up-to-date wallet technology, and response to key compromise',
+      requirement: 'Assess the risks posed to each storage method in view of new developments in security threats, technology and market conditions, and implement appropriate storage solutions for the secure storage of client virtual assets. Keep wallet storage technology up to date and in line with international best practices or standards, and fully test the technology and any upgrades before deployment to ensure reliability and security. Implement measures to deal with any compromise or suspected compromise of all or part of any seed or private key without undue delay, including the transfer of all client virtual assets to a new storage location as appropriate. The Associated Entity is subject to the same requirements.'
+    },
+    'SFC-VATP-10.10': {
+      title: 'Deposit and withdrawal controls: 51% attacks, client IP monitoring, immutable destination addresses',
+      requirement: 'Have adequate processes for handling deposit and withdrawal requests for client virtual assets to guard against losses arising from theft, fraud and other dishonest acts, professional misconduct or omissions: (a) continuously monitor developments — such as technological changes or the evolution of security threats — relevant to all virtual assets included for trading, with clear processes, proactively executed, to evaluate their potential impact and risks and to handle fraud attempts specific to distributed ledger technology (such as 51% attacks); (b) monitor client IP addresses to identify and follow up on potential deposit or withdrawal instructions not originated from the client; and (c) ensure wallet addresses used for deposit and withdrawal are whitelisted, using appropriate controls to prevent transfers to addresses other than the client’s designated wallet address, and ensure destination addresses of client withdrawal instructions cannot be modified before transactions are signed and broadcast to the respective blockchain.'
+    },
+    'SFC-VATP-10.20': {
+      title: 'Designated staff to conduct regular internal audits of custody compliance',
+      requirement: 'Assign designated staff member(s) to conduct regular internal audits monitoring compliance with the requirements for custody of client assets and with the established policies and procedures for handling those assets. The designated staff should report to senior management as soon as practicable upon becoming aware of any non-compliance.'
+    },
+    'SFC-VATP-10.21': {
+      title: 'Monitor account activity for inactive or dormant accounts',
+      requirement: 'Closely monitor account activities to check for inactive or dormant accounts, and establish internal procedures for how deposits and withdrawals of client assets in these accounts should be handled.'
+    },
+    'SFC-VATP-SCH3-1': {
+      clause: 'Schedule 3, section 1',
+      title: 'Minimum content of audit logs (order lifecycle, login attempts, access grants, parameter changes)',
+      requirement: 'Keep audit logs for the activities of the platform’s systems — including but not limited to the audit trails and access logs referred to in Part XII (Cybersecurity) — for not less than two years under paragraph 14.8(e), and make them available to the SFC on request. Audit logs should document the order process and transaction flow through the trading platform, at a minimum including: (a) order placement, cancellation, modification and execution, with time stamping and the assignment of a unique reference number; (b) system login attempts, including user identity and the date and time of the attempt; (c) trading, position and cash limit validation exceptions; (d) compliance validation exceptions; (e) the assigning of hierarchical user access; (f) details of changes to critical system parameters and master files; and (g) erroneous order inputs. The logs should be reviewed regularly to detect potential problems and plan preventive measures.'
+    },
+    'SFC-VATP-SCH3-2': {
+      clause: 'Schedule 3, section 2',
+      title: 'Minimum content of incident reports, including root cause analysis and recurrence prevention',
+      requirement: 'Keep incident reports for all material system delays or failures for not less than two years under paragraph 14.8(f), and make them available to the SFC on request. Incident reports should document instances where the platform or system experiences a material delay or failure rendering it unusable by clients, at a minimum including: (a) a clear explanation of the problem, including the root cause analysis; (b) the time of the outage or delay; (c) its duration; (d) the platforms or systems affected during the outage or delay and subsequently; (e) whether this problem or a related problem has occurred before; (f) the number of clients affected at the time and the impact on them; (g) the steps taken to rectify the problem; and (h) the steps taken to ensure that the problem does not occur again. The reports should be reviewed regularly to detect potential problems and plan preventive measures.'
     }
   }
 });

@@ -11,8 +11,8 @@
   <p>
     <a href="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml"><img src="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
-    <img src="https://img.shields.io/badge/version-1.5.0-0ea5e9" alt="Version 1.5.0">
-    <img src="https://img.shields.io/badge/控制點-135-16a34a" alt="135 controls">
+    <img src="https://img.shields.io/badge/version-1.6.0-0ea5e9" alt="Version 1.6.0">
+    <img src="https://img.shields.io/badge/控制點-152-16a34a" alt="152 controls">
     <img src="https://img.shields.io/badge/條文出處-20-64748B" alt="20 sources">
     <img src="https://img.shields.io/badge/語言-EN%20%C2%B7%20%E7%B9%81%20%C2%B7%20%E7%AE%80-7c3aed" alt="Three languages">
     <img src="https://img.shields.io/badge/零依賴-雙擊即用-7c3aed" alt="Zero dependency">
@@ -64,12 +64,12 @@ git clone https://github.com/arthurpanhku/hk-cyber-compliance.git
 
 ## 覆蓋範圍
 
-v1.5.0 共 **135 條控制點**，來自 **20 份**官方文件。每份出處各有自己的 `verifiedOn`——
+v1.6.0 共 **152 條控制點**，來自 **20 份**官方文件。每份出處各有自己的 `verifiedOn`——
 最近一次實際打開官網核對連結與版本的日期。條文發佈跨 2001 至 2026 年、複核節奏各不相同，
 用一個全局日期會讓剛複核過的和多年沒碰的看起來一樣新。頁首顯示的是其中**最早**的一個，
 即以最弱的一環為準；另有每週自動巡檢全部連結的工作流。
 
-### 證監會 SFC（75 條）
+### 證監會 SFC（92 條）
 
 | 文件 | 日期 | 說明 |
 | --- | --- | --- |
@@ -77,7 +77,7 @@ v1.5.0 共 **135 條控制點**，來自 **20 份**官方文件。每份出處�
 | [通函 26EC35：抗釣魚認證與可疑活動監控](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC35) | 2026-07-09 | OTP 不再獲接受；passkey／設備綁定；**限期 2027-07-08** |
 | [通函 26EC32：應對 AI 驅動網絡攻擊](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC32) | 2026-06-02 | 資產清單、加速補丁、最小權限、微分段、不可信輸入處理 |
 | 《操守準則》第 18 段及附表 7 | — | 互聯網交易的上位規定 |
-| [虛擬資產交易平台營運者指引](https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/Guidelines-for-Virtual-Asset-Trading-Platform-Operators/Guidelines-for-Virtual-Asset-Trading-Platform-Operators.pdf) | 2023-06 | 第 XII 部「網絡安全」全部條文 12.1–12.20，共 33 條。根據《證券及期貨條例》第 399 條及《打擊洗錢條例》第 53ZTK 條發佈 |
+| [虛擬資產交易平台營運者指引](https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/Guidelines-for-Virtual-Asset-Trading-Platform-Operators/Guidelines-for-Virtual-Asset-Trading-Platform-Operators.pdf) | 2023-06 | 第 XII 部「網絡安全」全部條文 12.1–12.20、第 X 部「客戶資產的保管」的技術性保安條文，以及附表 3，共 50 條。根據《證券及期貨條例》第 399 條及《打擊洗錢條例》第 53ZTK 條發佈 |
 
 ### 金管局 HKMA — 認可機構（24 條）
 
@@ -131,8 +131,8 @@ v1.5.0 共 **135 條控制點**，來自 **20 份**官方文件。每份出處�
 例如把「每日離線備份」和「在嚴重情景下測試關鍵業務交付能力」合併，或把強制的 12 小時法定事故通報
 與《私隱條例》下的自願通報合併。兩者性質不同，合併會造成合規誤讀。
 
-在勾選全部牌照與業務特徵的最大範圍下，135 條條文合併為 **97 項**獨立要求。
-平台營運者若勾選「虛擬資產服務提供者」與「互聯網交易」，73 條適用條文會合併為 **44 項**——
+在勾選全部牌照與業務特徵的最大範圍下，152 條條文合併為 **114 項**獨立要求。
+平台營運者若勾選「虛擬資產服務提供者」與「互聯網交易」，90 條適用條文會合併為 **61 項**——
 證監會撰寫《虛擬資產交易平台營運者指引》第 XII 部時顯然以《黑客入侵風險指引》為藍本，
 大部分是同一項要求寫了兩遍，合併正是為了不讓清單虛胖。
 
@@ -176,7 +176,7 @@ python3 tools/gen-hant.py
 data/
 ├── _registry.js          全局註冊表與語言查找
 ├── sources.js            20 份條文出處（標題、日期、法律地位、官方連結）
-├── taxonomy.js           14 種牌照 · 6 項業務特徵 · 10 個控制域
+├── taxonomy.js           14 種牌照 · 6 項業務特徵 · 11 個控制域
 ├── i18n/
 │   ├── zh-Hans.js        簡體界面字符串
 │   ├── zh-Hant.js        繁體層（生成）
@@ -184,7 +184,7 @@ data/
 └── controls/
     ├── sfc-internet-trading.js    SFC 黑客風險指引 20 項 + 操守準則
     ├── sfc-circulars-2026.js      SFC 2026 年兩份通函
-    ├── sfc-vatp.js                虛擬資產交易平台指引第 XII 部（網絡安全）
+    ├── sfc-vatp.js                虛擬資產交易平台指引第 X、XII 部及附表 3
     ├── hkma.js                    TM-G-1 / TM-E-1 / TM-C-1 / OR-2 / SA-2 / C-RAF
     ├── svf.js                     儲值支付工具指引與實務備考
     ├── pdpo.js                    六項保障資料原則
