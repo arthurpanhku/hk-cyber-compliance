@@ -32,6 +32,7 @@ HKCC.addDomains([
   { id: 'identity', label: '身份认证与访问控制', desc: '客户认证、密码策略、权限管理、特权账户' },
   { id: 'protect', label: '系统与网络加固', desc: '网络分段、补丁、端点防护、物理安全' },
   { id: 'data', label: '数据保护与加密', desc: '传输与存储加密、敏感资料保护' },
+  { id: 'custody', label: '虚拟资产保管与密钥管理', desc: '冷热钱包分隔、种子与私钥的生成、存储、备份及存取权限' },
   { id: 'detect', label: '监测、侦测与告警', desc: '异常交易监控、日志、威胁情报、客户通知' },
   { id: 'respond', label: '事件响应与监管报告', desc: '事故处理程序、上报时限、根因分析' },
   { id: 'resilience', label: '备份、韧性与业务连续性', desc: '备份、灾难恢复、营运韧性、容忍度设定' },

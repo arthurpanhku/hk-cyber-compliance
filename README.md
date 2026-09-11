@@ -11,8 +11,8 @@
   <p>
     <a href="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml"><img src="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
-    <img src="https://img.shields.io/badge/version-1.5.0-0ea5e9" alt="Version 1.5.0">
-    <img src="https://img.shields.io/badge/controls-135-16a34a" alt="135 controls">
+    <img src="https://img.shields.io/badge/version-1.6.0-0ea5e9" alt="Version 1.6.0">
+    <img src="https://img.shields.io/badge/controls-152-16a34a" alt="152 controls">
     <img src="https://img.shields.io/badge/sources-20-64748B" alt="20 sources">
     <img src="https://img.shields.io/badge/languages-EN%20%C2%B7%20%E7%B9%81%20%C2%B7%20%E7%AE%80-7c3aed" alt="Three languages">
     <img src="https://img.shields.io/badge/zero%20dependencies-double--click%20to%20run-7c3aed" alt="Zero dependency">
@@ -69,13 +69,13 @@ It also deploys to GitHub Pages as-is (repository settings → Pages → publish
 
 ## Coverage
 
-v1.5.0 contains **135 controls** drawn from **20** official documents. Each source carries its own
+v1.6.0 contains **152 controls** drawn from **20** official documents. Each source carries its own
 `verifiedOn` — the day its link and version were last checked against the regulator's website — because
 the documents span 2001 to 2026 and are re-checked at different times. The header shows the **earliest**
 of those dates, so the freshness claimed is the weakest link, never the most recently touched one. A
 scheduled workflow re-checks every link weekly.
 
-### SFC (75 controls)
+### SFC (92 controls)
 
 | Document | Date | Notes |
 | --- | --- | --- |
@@ -83,7 +83,7 @@ scheduled workflow re-checks every link weekly.
 | [Circular 26EC35: phishing-resistant authentication and suspicious activity monitoring](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC35) | 2026-07-09 | OTP no longer accepted; passkeys / device binding; **deadline 2027-07-08** |
 | [Circular 26EC32: addressing AI-enabled cyberattacks](https://apps.sfc.hk/edistributionWeb/gateway/EN/circular/intermediaries/supervision/doc?refNo=26EC32) | 2026-06-02 | Asset inventory, accelerated patching, least privilege, micro-segmentation, handling of untrusted input |
 | Code of Conduct paragraph 18 and Schedule 7 | — | The overarching rules for internet trading |
-| [Guidelines for Virtual Asset Trading Platform Operators](https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/Guidelines-for-Virtual-Asset-Trading-Platform-Operators/Guidelines-for-Virtual-Asset-Trading-Platform-Operators.pdf) | 2023-06 | Part XII (Cybersecurity) in full, 12.1–12.20 — 33 controls. Published under s.399 SFO and s.53ZTK AMLO |
+| [Guidelines for Virtual Asset Trading Platform Operators](https://www.sfc.hk/-/media/EN/assets/components/codes/files-current/web/guidelines/Guidelines-for-Virtual-Asset-Trading-Platform-Operators/Guidelines-for-Virtual-Asset-Trading-Platform-Operators.pdf) | 2023-06 | Part XII (Cybersecurity) 12.1–12.20 in full, the technical security provisions of Part X (Custody of Client Assets) and Schedule 3 — 50 controls. Published under s.399 SFO and s.53ZTK AMLO |
 
 ### HKMA — authorized institutions (24 controls)
 
@@ -141,8 +141,8 @@ operations under severe but plausible scenarios", say, or merging the mandatory 
 notification with voluntary notification under the PDPO. Those are different obligations, and merging them
 would mislead.
 
-Selecting every licence and characteristic, the 135 provisions collapse to **97** distinct requirements. A
-platform operator that ticks VASP and internet trading sees 73 applicable provisions collapse to **44** —
+Selecting every licence and characteristic, the 152 provisions collapse to **114** distinct requirements. A
+platform operator that ticks VASP and internet trading sees 90 applicable provisions collapse to **61** —
 the SFC wrote Part XII of the VATP Guidelines closely along the lines of the Hacking Risks Guidelines, so
 most of it is the same obligation stated twice, and merging is what keeps the list honest.
 
@@ -190,7 +190,7 @@ the English text matches the wording a reader will find in the cited document.
 data/
 ├── _registry.js          global registry and locale lookup
 ├── sources.js            20 source documents (title, date, legal status, official link)
-├── taxonomy.js           14 licences · 6 business characteristics · 10 control domains
+├── taxonomy.js           14 licences · 6 business characteristics · 11 control domains
 ├── i18n/
 │   ├── zh-Hans.js        Simplified UI strings
 │   ├── zh-Hant.js        Traditional layer (generated)
@@ -198,7 +198,7 @@ data/
 └── controls/
     ├── sfc-internet-trading.js    SFC Hacking Risks Guidelines (20) + Code of Conduct
     ├── sfc-circulars-2026.js      the two 2026 SFC circulars
-    ├── sfc-vatp.js                VATP Guidelines Part XII (Cybersecurity)
+    ├── sfc-vatp.js                VATP Guidelines Parts X and XII, and Schedule 3
     ├── hkma.js                    TM-G-1 / TM-E-1 / TM-C-1 / OR-2 / SA-2 / C-RAF
     ├── svf.js                     SVF Guideline and Practice Note
     ├── pdpo.js                    the six Data Protection Principles

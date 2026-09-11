@@ -310,6 +310,148 @@
       quote: 'In the event of material system delay or failure, a Platform Operator should, in a timely manner: (a) rectify the situation; and (b) inform clients about the situation as soon as practicable and how their pending orders, deposits and withdrawals will be handled.',
       quoteStatus: 'verbatim',
       applicability: { licenses: VA, attributes: [] }
+    },
+
+    // ---- 第 X 部：客户资产的保管（只收录技术性保安条文）----
+    {
+      id: 'SFC-VATP-10.6c', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.6(c)',
+      title: '客户虚拟资产的 98% 须存于冷存储',
+      requirement: '平台营运者及其有联系实体须将客户虚拟资产的 98% 存放于冷存储（例如以硬件安全模块 HSM 为基础的冷存储），以减低因平台被入侵或遭黑客攻击而蒙受损失的风险；只有在证监会按个别情况准许的有限情况下方可例外。',
+      quote: 'The Platform Operator and its Associated Entity should store 98% of client virtual assets in cold storage (such as Hardware Security Module (HSM)-based cold storage) except under limited circumstances permitted by the SFC on a case-by-case basis to minimise exposure to losses arising from a compromise or hacking of the platform.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.6d', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.6(d)',
+      title: '尽量减少从冷存储转出的交易',
+      requirement: '平台营运者及其有联系实体须尽量减少从存放大部分客户虚拟资产的冷存储转出的交易。',
+      quote: 'The Platform Operator and its Associated Entity should minimise transactions out of the cold storage in which a majority of client virtual assets are held.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.6e', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.6(e)',
+      title: '加密设备及应用程式的存取授权与验证规格',
+      requirement: '平台营运者及其有联系实体须就如何授权及验证对加密设备或应用程式的存取订立详细规格，涵盖密钥的生成、分发、存储、使用及销毁。',
+      quote: 'The Platform Operator and its Associated Entity should have detailed specifications for how access to cryptographic devices or applications is to be authorised and validated, covering key generation, distribution, storage, use and destruction.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.6f', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.6(f)',
+      title: '冷热钱包之间转移机制的详细文档与权限范围',
+      requirement: '平台营运者及其有联系实体须详细记录虚拟资产在热存储、冷存储及其他存储之间转移的机制，并清楚订明获指派执行该等转移中任何非自动化流程的每个职能的权限范围。',
+      quote: 'The Platform Operator and its Associated Entity should document in detail the mechanism for the transfer of virtual assets between hot, cold and other storages. The scope of authority of each function designated to perform any non-automated process in such transfers should be clearly specified.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.6g', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.6(g)',
+      title: '投票、硬分叉及空投事件的操作与技术程序',
+      requirement: '平台营运者及其有联系实体须就如何从操作及技术角度处理投票、硬分叉或空投等事件订立详细程序。',
+      quote: 'The Platform Operator and its Associated Entity should have detailed procedures for how to deal with events such as voting, hard forks or airdrops from an operational and technical point of view.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.7', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.7',
+      title: '客户虚拟资产的存取款只可经已列入白名单的客户钱包地址',
+      requirement: '除证监会指明的获准许情况外，平台营运者不得透过并非属于客户、且未经平台营运者列入白名单的钱包地址，进行客户虚拟资产的存款及提款。平台营运者须确保其有联系实体亦遵守此项要求。',
+      quote: 'A Platform Operator should not conduct any deposits and withdrawals of client virtual assets through any wallet address other than an address which belongs to the client and is whitelisted by the Platform Operator, except under permitted circumstances specified by the SFC.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.8a', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.8(a)',
+      title: '种子及私钥须以不可推演的方式生成，尽可能离线并存于 HSM',
+      requirement: '所生成的种子及私钥须足以抵御推测或串谋。种子及私钥须按适用的国际保安标准及业界最佳实践生成，确保种子（使用分层确定性钱包或类似流程时）或私钥（不使用种子时）以非确定性方式生成，具备随机性因而不可重现。在切实可行的情况下，种子及私钥应离线生成，并在种子或私钥的整个生命周期内保存于安全环境中，例如具备适当认证的硬件安全模块（HSM）。',
+      quote: 'The generated seeds and private keys must be sufficiently resistant to speculation or collusion. … Where practicable, seeds and private keys should be generated offline and kept in a secure environment, such as a HSM, with appropriate certification for the lifetime of the seeds or private keys.',
+      quoteStatus: 'excerpt',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.8b', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.8(b)',
+      title: '密钥存取的授权验证、多重认证与即时撤销',
+      requirement: '就如何授权及验证对加密设备或应用程式的存取订立详细规格，涵盖密钥的生成、分发、使用、存储及销毁，以及在有需要时即时撤销签署人的存取权。在切实可行的情况下，须采用多重因素认证，以验证获授权人员对管理私钥使用的应用程式的存取。',
+      quote: 'Detailed specifications for how access to cryptographic devices or applications is to be authorised and validated, covering key generation, distribution, use, storage and destruction, as well as the immediate revocation of a signatory’s access as required. Where practicable, multi-factor authentication is used to authenticate authorised personnel for access to applications governing the use of private keys.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.8c', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.8(c)',
+      title: '密钥存取严格限于经审查人员，且无任何单一人员掌握全部',
+      requirement: '与客户虚拟资产有关的种子及私钥的存取权，须严格限于已接受适当审查及培训的获授权人员；不得有任何单一人员掌握或可存取种子、私钥或备份助记词的全部；并须实施控制以缓减获授权人员之间串谋的风险。',
+      quote: 'Access to seeds and private keys relating to client virtual assets is tightly restricted amongst authorised personnel who have undergone appropriate screening and training, no single person has possession of information on or access to the entirety of the seeds, private keys or backup passphrases, and controls are implemented to mitigate the risk of collusion amongst authorised personnel.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.8d', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.8(d)',
+      title: '种子及私钥的分布式备份，且不得单靠同一地点的备份重建',
+      requirement: '须保存种子或私钥的分布式备份，以缓减任何单点故障。备份须以影响种子或私钥主存放地点的事件不会同时影响备份的方式分散存放。备份须以受保护形式存放于外部媒介（宜为具备适当认证的 HSM）。分布式备份的存放方式须确保不能仅凭存放于同一实际地点的备份重新生成种子或私钥。对备份的存取控制须与对原始种子或私钥的存取控制同样严格。',
+      quote: 'Distributed backups of seeds or private keys are kept so as to mitigate any single point of failure. … Access control to the backups needs to be as stringent as access control to the original seeds or private keys.',
+      quoteStatus: 'excerpt',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.8e', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.8(e)',
+      title: '种子及私钥须安全存放于香港',
+      requirement: '种子及私钥须安全存放于香港。',
+      quote: 'Seeds and private keys are securely stored in Hong Kong.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.9', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.9',
+      title: '存储方式的风险评估、钱包技术更新与密钥外泄的应对',
+      requirement: '因应保安威胁、技术及市场状况的新发展，评估各种存储方式所面对的风险，并实施适当的存储方案以确保客户虚拟资产获安全存放；亦须确保其有联系实体作出相同安排。平台营运者尤须令钱包存储技术保持最新并符合国际最佳实践或标准；钱包存储技术及其任何升级须在部署前经全面测试，以确保可靠性及安全性。平台营运者须实施（并确保其有联系实体实施）措施，在任何种子或私钥全部或部分外泄或懷疑外泄时不作不当延误地处理，包括在适当情况下将所有客户虚拟资产转移至新的存储位置。',
+      quote: 'The Platform Operator should implement, and should ensure that its Associated Entity implements, measures to deal with any compromise or suspected compromise of all or part of any seed or private key without undue delay, including the transfer of all client virtual assets to a new storage location as appropriate.',
+      quoteStatus: 'excerpt',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.10', domain: 'custody', priority: 'baseline', sourceId: src, clause: '10.10',
+      title: '存取款处理的保安控制（51% 攻击、客户 IP 监察、提款地址不可篡改）',
+      requirement: '就客户虚拟资产的存款及提款要求设有充分的处理流程，以防范因盗窃、欺诈及其他不诚实行为、专业失当或遗漏而蒙受损失：(a) 持续监察与所有可供交易的虚拟资产有关的发展（例如技术变化或保安威胁的演变），并设有清晰流程评估该等发展的潜在影响与风险，以及处理分布式帐本技术特有的欺诈企图（例如 51% 攻击），且须主动执行该等流程；(b) 监察客户的 IP 地址，以识别并跟进可能并非由客户发出的存款或提款指示；(c) 确保用于存款及提款的钱包地址已列入白名单，并采用适当控制防止客户将资产转移至其指定钱包地址以外的地址；平台营运者及其有联系实体须确保客户提款指示的目标地址在交易被签署并广播至相应区块链之前不可被修改。',
+      quote: 'The Platform Operator and its Associated Entity should ensure that destination addresses of client withdrawal instructions cannot be modified before the transactions are signed and broadcasted to the respective blockchain.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.20', domain: 'assurance', priority: 'baseline', sourceId: src, clause: '10.20',
+      title: '指派专责人员定期内部审核客户资产保管的合规情况',
+      requirement: '指派专责人员定期进行内部审核，监察平台营运者是否遵守客户资产保管的各项要求，以及其就处理该等资产所订立的政策及程序。专责人员一旦察觉任何不合规情况，须在切实可行范围内尽快向平台营运者的高级管理层报告。',
+      quote: 'A Platform Operator should assign designated staff member(s) to conduct regular internal audits to monitor its compliance with the requirements for custody of client assets, and its established policies and procedures in respect of handling of these assets.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+    {
+      id: 'SFC-VATP-10.21', domain: 'detect', priority: 'baseline', sourceId: src, clause: '10.21',
+      title: '密切监察账户活动以识别不活跃或休眠账户',
+      requirement: '密切监察账户活动，检查是否有不活跃或休眠账户，并就该等账户的客户资产存款及提款应如何处理订立内部程序。',
+      quote: 'A Platform Operator should closely monitor account activities to check if there are inactive or dormant accounts. It should establish internal procedures as to how deposits and withdrawals of client assets in these accounts should be handled.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] }
+    },
+
+    // ---- 附表 3：审计日志及事故报告（锚定条文为第 14.8(e)、(f) 段）----
+    {
+      id: 'SFC-VATP-SCH3-1', domain: 'detect', priority: 'baseline', sourceId: src, clause: '附表 3 第 1 节',
+      title: '审计日志的最低内容（买卖盘全流程、登录尝试、权限指派、参数变更）',
+      requirement: '按第 14.8(e) 段保存系统活动的审计日志（包括但不限于第 XII 部所指的审计轨迹及存取日志），保存期不少于两年，并须应证监会要求提供。审计日志须记录买卖盘流程及经交易平台的交易流程，至少包括：(a) 买卖盘的下达／取消／修改／执行（须有时间戳及唯一参考编号）；(b) 系统登录尝试，包括用户身份、登录尝试的日期及时间；(c) 交易限额／持仓限额／现金限额的验证例外；(d) 合规验证例外；(e) 分层用户存取权限的指派；(f) 关键系统参数及主档案的变更详情；(g) 错误的买卖盘输入。日志须定期检视，以侦测潜在问题及规划预防措施。',
+      quote: 'Audit logs should document the order process and transaction flow through the trading platform, where applicable.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] },
+      crossRefs: ['SFC-VATP-12.12a']
+    },
+    {
+      id: 'SFC-VATP-SCH3-2', domain: 'respond', priority: 'baseline', sourceId: src, clause: '附表 3 第 2 节',
+      title: '事故报告的最低内容（含根本原因分析与防止再发生的措施）',
+      requirement: '按第 14.8(f) 段就所有重大系统延误或故障保存事故报告，保存期不少于两年，并须应证监会要求提供。事故报告须记录平台或系统出现重大延误或故障以致客户无法使用的情况，至少包括：(a) 问题的清楚说明，包括根本原因分析；(b) 中断或延误的时间；(c) 中断或延误的持续时长；(d) 中断或延误期间及其后受影响的平台或系统；(e) 此问题或相关问题过往是否曾经发生；(f) 当时受影响的客户数目及对该等客户的影响；(g) 为纠正问题已采取的步骤；(h) 为确保问题不再发生已采取的步骤。报告须定期检视，以侦测潜在问题及规划预防措施。',
+      quote: 'Incident reports should document instances where the Platform Operator’s platform or system experiences a material delay or failure that renders it unusable by clients.',
+      quoteStatus: 'verbatim',
+      applicability: { licenses: VA, attributes: [] },
+      crossRefs: ['SFC-VATP-12.20']
     }
   ]);
 })();
