@@ -19,7 +19,10 @@
   <div class="header-actions">
     <!-- 语言按钮由 app.js 依 HKCC.locales 生成 -->
     <div class="lang" id="lang" role="group"></div>
-    <button id="export"></button>
+    <button id="export-project" class="primary"></button>
+    <button id="import-project"></button>
+    <input id="import-file" type="file" accept=".json,.hkcc.json,application/json" hidden>
+    <button id="export-csv"></button>
     <button id="print"></button>
     <button id="reset"></button>
     <button id="theme"></button>
@@ -32,6 +35,7 @@
   <main>
     <div class="print-header">
       <h1 id="ph-title"></h1>
+      <p id="ph-project"></p>
       <p id="ph-scope"></p>
       <p id="ph-attrs"></p>
       <p id="ph-date"></p>
@@ -41,6 +45,7 @@
 
     <div class="panel toolbar">
       <input type="search" id="q">
+      <select id="domain-filter"></select>
       <label class="inline"><input type="checkbox" id="merge"> <span id="merge-label"></span></label>
       <label class="inline"><input type="checkbox" id="gaps"> <span id="gaps-label"></span></label>
     </div>
@@ -64,6 +69,7 @@
 <script src="data/i18n/zh-Hant.js"></script>
 <script src="data/i18n/en.js"></script>
 <script src="js/i18n.js"></script>
+<script src="js/engine.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

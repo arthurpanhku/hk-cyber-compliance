@@ -11,7 +11,7 @@
   <p>
     <a href="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml"><img src="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
-    <img src="https://img.shields.io/badge/version-1.3.0-0ea5e9" alt="Version 1.3.0">
+    <img src="https://img.shields.io/badge/version-1.4.0-0ea5e9" alt="Version 1.4.0">
     <img src="https://img.shields.io/badge/controls-102-16a34a" alt="102 controls">
     <img src="https://img.shields.io/badge/sources-20-64748B" alt="20 sources">
     <img src="https://img.shields.io/badge/languages-EN%20%C2%B7%20%E7%B9%81%20%C2%B7%20%E7%AE%80-7c3aed" alt="Three languages">
@@ -59,15 +59,17 @@ It also deploys to GitHub Pages as-is (repository settings → Pages → publish
 | **Filter by licence** | 14 licence / entity types (SFC regulated activities, VASP, authorized institutions, stored value facilities, general companies) |
 | **Narrow by business profile** | 6 characteristics (internet trading, e-banking, personal data processing, CI designation, outsourcing/cloud, use of AI models) decide whether a provision applies to a given licence |
 | **De-duplication and cross-mapping** | Where the SFC and HKMA impose the same requirement, it is merged into a single card listing each regulator's own provision and clause number |
-| **Traceable to source** | Every control carries a description, the quoted official English text, the clause number, the issue date and the official link |
-| **Self-assessment and gap report** | Mark each control implemented / partial / not implemented / N/A, see a live compliance score, and filter to outstanding items |
+| **Traceable to source** | Every control carries a description, clause number, issue and verification dates, official link, and a verbatim / excerpt / summary label for its English source text |
+| **Assessment work record** | Record status, implementation notes, evidence references, owner and target date for each individual regulatory control |
+| **Remediation list** | Review unrated, partially implemented and unimplemented controls by domain, with overdue and 30-day due indicators |
+| **Portable project file** | Export or import a versioned `.hkcc.json` backup containing the full scope and assessment record |
 | **Three languages** | English, Traditional Chinese and Simplified Chinese, switchable in the header — including the CSV export |
-| **Export** | One-click CSV (with BOM, so Chinese opens correctly in Excel) or print to PDF (with a licence-scope header) |
-| **Stored locally** | Selections and self-assessment progress live in browser localStorage; nothing is uploaded |
+| **Export** | Export a formula-safe CSV or print to PDF, including project details and work-record fields |
+| **Stored locally** | Project data is saved in browser localStorage; nothing is uploaded |
 
 ## Coverage
 
-v1.3.0 contains **102 controls** drawn from **20** official documents. Each source carries its own
+v1.4.0 contains **102 controls** drawn from **20** official documents. Each source carries its own
 `verifiedOn` — the day its link and version were last checked against the regulator's website — because
 the documents span 2001 to 2026 and are re-checked at different times. The header shows the **earliest**
 of those dates, so the freshness claimed is the weakest link, never the most recently touched one. A
@@ -211,6 +213,7 @@ overlay files in `data/i18n/`:
   title: '客户账户登录须实施双重认证',
   requirement: '……',
   quote: 'A licensed or registered person should implement …',  // official English, never translated
+  quoteStatus: 'excerpt',               // verbatim | excerpt | summary
   applicability: { licenses: [...], attributes: [...] },
   deadline: '2027-07-08',              // optional compliance deadline
   crossRefs: ['SFC-PH-A1', 'HKMA-TME1-4.1']
@@ -231,12 +234,14 @@ Additions, corrections and regulatory updates are welcome. Before submitting, ru
 
 ```bash
 node tools/validate.mjs
+node --test tests/*.test.mjs
 ```
 
 It checks that IDs are unique, sources exist, domains / licences / characteristics are valid, cross
-references resolve, required fields are present, every source has a `verifiedOn`, **and that the English
-and Traditional layers are complete** — a control added without its translations fails the build. Sources
-unchecked for more than 180 days raise a warning.
+references resolve, required fields and source-text classifications are present, every source has a
+`verifiedOn`, **and that the English and Traditional layers are complete** — a control added without its
+translations fails the build. Unit tests cover applicability, merging, v1 migration, project validation,
+due dates and CSV injection protection. Sources unchecked for more than 180 days raise a warning.
 
 `.github/workflows/ci.yml` runs this on every pull request, and also confirms the generated Traditional
 files are up to date. A separate weekly workflow re-checks all 20 source links:

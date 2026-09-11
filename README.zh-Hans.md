@@ -11,7 +11,7 @@
   <p>
     <a href="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml"><img src="https://github.com/arthurpanhku/hk-cyber-compliance/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1d4ed8" alt="License: MIT"></a>
-    <img src="https://img.shields.io/badge/version-1.3.0-0ea5e9" alt="Version 1.3.0">
+    <img src="https://img.shields.io/badge/version-1.4.0-0ea5e9" alt="Version 1.4.0">
     <img src="https://img.shields.io/badge/控制点-102-16a34a" alt="102 controls">
     <img src="https://img.shields.io/badge/条文出处-20-64748B" alt="20 sources">
     <img src="https://img.shields.io/badge/语言-EN%20%C2%B7%20%E7%B9%81%20%C2%B7%20%E7%AE%80-7c3aed" alt="Three languages">
@@ -54,15 +54,17 @@ git clone https://github.com/arthurpanhku/hk-cyber-compliance.git
 | **按牌照筛选** | 14 种牌照／实体类型（SFC 各类受规管活动、VASP、认可机构、储值支付工具、一般企业） |
 | **按业务特征细分** | 6 项特征（互联网交易、电子银行、处理个人资料、关键基础设施指定、外判／云端、使用 AI 模型）决定同一牌照下条文是否适用 |
 | **控制点去重与交叉映射** | 同一项要求被 SFC 与 HKMA 同时规定时合并为一张卡片，并逐一列出各自的条文出处与条款编号 |
-| **条文可追溯** | 每条控制点附说明 + 英文条文原文引述 + 条款编号 + 发布日期 + 官方链接 |
-| **自评与差距报告** | 每项可标记「已实施／部分／未实施／不适用」，实时计算合规度，支持「只看未完成」 |
+| **条文可追溯** | 每条控制附说明、条款、发布及核验日期、官方链接，并标明英文来源文字属于原文、节录或说明 |
+| **评估工作记录** | 每个监管控制可记录状态、实施说明、证据引用、负责人及目标完成日期 |
+| **整改清单** | 集中查看未评、部分及未实施控制，按控制领域筛选并标示逾期／30 日内到期 |
+| **可携项目文件** | 导出或导入带版本号的 `.hkcc.json` 备份，保留范围和完整评估记录 |
 | **三种语言** | 英文、繁体中文、简体中文，页首一键切换，导出的 CSV 亦随之切换 |
-| **导出** | 一键导出 CSV（含 BOM，Excel 直接打开中文不乱码）或打印为 PDF（自动附牌照范围抬头） |
-| **本地保存** | 选择与自评进度存于浏览器 localStorage，不上传任何数据 |
+| **导出** | 导出含公式注入防护的 CSV，或打印为含项目资料及工作记录的 PDF |
+| **本地保存** | 项目资料存于浏览器 localStorage，不上传任何数据 |
 
 ## 覆盖范围
 
-v1.3.0 共 **102 条控制点**，来自 **20 份**官方文件。每份出处各有自己的 `verifiedOn`——
+v1.4.0 共 **102 条控制点**，来自 **20 份**官方文件。每份出处各有自己的 `verifiedOn`——
 最近一次实际打开官网核对链接与版本的日期。条文发布跨 2001 至 2026 年、复核节奏各不相同，
 用一个全局日期会让刚复核过的和多年没碰的看起来一样新。页首显示的是其中**最早**的一个，
 即以最弱的一环为准；另有每周自动巡检全部链接的工作流。
@@ -196,6 +198,7 @@ data/
   title: '客户账户登录须实施双重认证',
   requirement: '……',                   // 中文说明
   quote: 'A licensed or registered person should implement …',  // 英文原文，任何语言下都不翻译
+  quoteStatus: 'excerpt',               // verbatim | excerpt | summary
   applicability: { licenses: [...], attributes: [...] },
   deadline: '2027-07-08',              // 可选：合规限期
   crossRefs: ['SFC-PH-A1', 'HKMA-TME1-4.1']
@@ -214,10 +217,12 @@ data/
 
 ```bash
 node tools/validate.mjs
+node --test tests/*.test.mjs
 ```
 
-校验项包括：ID 唯一、出处存在、控制域／牌照／业务特征有效、交叉引用可解析、必填字段齐全、
+校验项包括：ID 唯一、出处存在、控制域／牌照／业务特征有效、交叉引用可解析、必填字段及来源文字分类齐全、
 每份出处都有 `verifiedOn`，**以及英文层与繁体层是否完整**——新增控制点若未补译，校验会失败。
+单元测试覆盖适用性、合并、v1 迁移、项目校验、到期计算及 CSV 注入防护。
 超过 180 天未复核的出处会出现提示。
 
 `.github/workflows/ci.yml` 会在每个 PR 上自动运行以上校验，并确认繁体生成物是最新的。

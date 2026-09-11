@@ -40,6 +40,7 @@ const attrIds = new Set(HKCC.attributes.map(a => a.id));
 const domainIds = new Set(HKCC.domains.map(d => d.id));
 const sourceIds = new Set(Object.keys(HKCC.sources));
 const controlIds = new Set();
+const quoteStatuses = new Set(['verbatim', 'excerpt', 'summary']);
 
 for (const c of HKCC.controls) {
   const at = `控制点 ${c.id ?? '(缺少 id)'}`;
@@ -57,6 +58,12 @@ for (const c of HKCC.controls) {
   for (const a of ap.attributes || []) if (!attrIds.has(a)) errors.push(`${at}: 未知业务特征 "${a}"`);
   if (c.deadline && !/^\d{4}-\d{2}-\d{2}$/.test(c.deadline)) errors.push(`${at}: deadline 格式须为 YYYY-MM-DD`);
   if (!c.quote) warn.push(`${at}: 无英文原文引述`);
+  if (c.quote && !quoteStatuses.has(c.quoteStatus)) {
+    errors.push(`${at}: quoteStatus 必须为 verbatim、excerpt 或 summary`);
+  }
+  if (['verbatim', 'excerpt'].includes(c.quoteStatus) && !c.clause) {
+    errors.push(`${at}: 原文或节录必须提供 clause`);
+  }
 }
 
 for (const c of HKCC.controls) {
@@ -133,6 +140,17 @@ for (const loc of TRANSLATED) {
     if (miss.length) errors.push(`${loc}: ${kind} 缺译 — ${miss.join(', ')}`);
   }
 }
+
+/* ---------- 离线运行约束 ---------- */
+for (const path of ['js/engine.js', 'js/i18n.js', 'js/app.js']) {
+  const code = readFileSync(join(root, path), 'utf8');
+  if (/\bfetch\s*\(|\bXMLHttpRequest\b/.test(code)) {
+    errors.push(`${path}: 不得在运行时读取本地数据，否则 file:// 模式会失效`);
+  }
+}
+const html = readFileSync(join(root, 'index.html'), 'utf8');
+if (/type=["']module["']/.test(html)) errors.push('index.html: 不得使用 ES module，须保持 file:// 兼容');
+if (!html.includes('<script src="js/engine.js"></script>')) errors.push('index.html: 缺少 js/engine.js');
 
 const byRegulator = {};
 for (const c of HKCC.controls) {

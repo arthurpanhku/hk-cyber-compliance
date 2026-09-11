@@ -1,145 +1,203 @@
-/* 香港网络安全合规助手 —— 筛选引擎与界面渲染。无框架、无构建步骤。
-   所有面向用户的文字一律经 t() / tr() 取用，不在本文件内硬编码任何语言。 */
+/* HK Cyber Compliance Assistant — practical assessment workspace. */
 (function () {
   'use strict';
 
-  const STORE_KEY = 'hkcc.state.v1';
+  const E = window.HKCCEngine;
+  const STORE_KEY = 'hkcc.state.v2';
+  const LEGACY_STORE_KEY = 'hkcc.state.v1';
+  const MAX_PROJECT_BYTES = 5 * 1024 * 1024;
   const STATUSES = [
+    { id: 'none', key: 'statusUnrated', cls: 's-none' },
     { id: 'done', key: 'statusDone', cls: 's-done' },
     { id: 'partial', key: 'statusPartial', cls: 's-partial' },
     { id: 'gap', key: 'statusGap', cls: 's-gap' },
     { id: 'na', key: 'statusNa', cls: 's-na' }
   ];
+  const byId = new Map(HKCC.controls.map(c => [c.id, c]));
+  const definitions = {
+    controlIds: new Set(HKCC.controls.map(c => c.id)),
+    licenseIds: new Set(HKCC.licenses.map(l => l.id)),
+    attributeIds: new Set(HKCC.attributes.map(a => a.id))
+  };
+
+  const today = () => {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
 
   const state = {
+    project: { name: '', asOfDate: today() },
     licenses: new Set(),
     attributes: new Set(),
-    assessment: {},      // controlId -> status id
+    assessments: Object.create(null),
+    unresolvedAssessments: Object.create(null),
     merge: true,
     gapsOnly: false,
-    query: ''
+    query: '',
+    domain: '',
+    storageAvailable: true
   };
 
-  const byId = new Map(HKCC.controls.map(c => [c.id, c]));
-  const $ = (sel, root) => (root || document).querySelector(sel);
-  const el = (tag, cls, text) => {
-    const n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
+  const $ = (selector, root) => (root || document).querySelector(selector);
+  const el = (tag, cls, value) => {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (value != null) node.textContent = value;
+    return node;
   };
-  const regKey = (r) => r === 'SFC' ? 'SFC' : r === 'HKMA' ? 'HKMA' : r === 'PCPD' ? 'PCPD' : 'CI';
-
-  /* ---------- 语言便捷函数 ---------- */
-  const t = (k, v) => HKCC.t(k, v);
-  const trControl = c => HKCC.tr('controls', c.id, c);
+  const regKey = regulator => regulator === 'SFC' ? 'SFC' :
+    regulator === 'HKMA' ? 'HKMA' : regulator === 'PCPD' ? 'PCPD' : 'CI';
+  const t = (key, vars) => HKCC.t(key, vars);
+  const trControl = control => HKCC.tr('controls', control.id, control);
   const trSource = id => HKCC.tr('sources', id, HKCC.sources[id]);
-  const trLicense = l => HKCC.tr('licenses', l.id, l);
-  const trAttribute = a => HKCC.tr('attributes', a.id, a);
-  const trDomain = d => HKCC.tr('domains', d.id, d);
+  const trLicense = licence => HKCC.tr('licenses', licence.id, licence);
+  const trAttribute = attribute => HKCC.tr('attributes', attribute.id, attribute);
+  const trDomain = domain => HKCC.tr('domains', domain.id, domain);
 
-  /* ---------- 持久化 ---------- */
+  function projectData(includeExportTime) {
+    return {
+      schemaVersion: E.SCHEMA_VERSION,
+      controlDataVersion: HKCC.meta.version,
+      exportedAt: includeExportTime ? new Date().toISOString() : '',
+      project: { ...state.project },
+      scope: { licenses: [...state.licenses], attributes: [...state.attributes] },
+      assessments: state.assessments,
+      unresolvedAssessments: state.unresolvedAssessments,
+      preferences: { merge: state.merge }
+    };
+  }
+
+  function hydrate(data) {
+    state.project = {
+      name: data.project?.name || '',
+      asOfDate: data.project?.asOfDate || today()
+    };
+    state.licenses = new Set(data.scope?.licenses || data.licenses || []);
+    state.attributes = new Set(data.scope?.attributes || data.attributes || []);
+    state.assessments = data.assessments || Object.create(null);
+    state.unresolvedAssessments = data.unresolvedAssessments || Object.create(null);
+    state.merge = data.preferences?.merge !== false && data.merge !== false;
+  }
+
   function save() {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({
-        licenses: [...state.licenses], attributes: [...state.attributes],
-        assessment: state.assessment, merge: state.merge
-      }));
-    } catch (e) { /* 隐私模式或站点数据被禁用时忽略 */ }
+      localStorage.setItem(STORE_KEY, JSON.stringify(projectData(false)));
+      state.storageAvailable = true;
+    } catch (error) {
+      state.storageAvailable = false;
+    }
   }
+
   function load() {
     try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (!raw) return;
-      const s = JSON.parse(raw);
-      (s.licenses || []).forEach(x => state.licenses.add(x));
-      (s.attributes || []).forEach(x => state.attributes.add(x));
-      state.assessment = s.assessment || {};
-      if (typeof s.merge === 'boolean') state.merge = s.merge;
-    } catch (e) { /* 读取失败时以空状态启动 */ }
-  }
-
-  /* ---------- 适用性判定 ----------
-     牌照为「任一命中」；业务特征为「全部具备」。
-     未勾选任何牌照时不显示任何控制点。 */
-  function applies(c) {
-    const ap = c.applicability;
-    if (!ap.licenses.some(l => state.licenses.has(l))) return false;
-    return (ap.attributes || []).every(a => state.attributes.has(a));
-  }
-
-  /* ---------- 合并聚类 ----------
-     只合并「双向交叉引用」的控制点：A 引用 B 且 B 引用 A，才视为同一项要求。
-     单向引用仅作「另见」，不合并，以免把范围不对等的条文错误等同。 */
-  function cluster(list) {
-    const ids = new Set(list.map(c => c.id));
-    const parent = new Map([...ids].map(i => [i, i]));
-    const find = x => parent.get(x) === x ? x : (parent.set(x, find(parent.get(x))), parent.get(x));
-    if (state.merge) {
-      for (const c of list) {
-        for (const r of c.crossRefs || []) {
-          if (!ids.has(r)) continue;
-          if (!(byId.get(r).crossRefs || []).includes(c.id)) continue;  // 须双向
-          const a = find(c.id), b = find(r);
-          if (a !== b) parent.set(a, b);
-        }
+      const current = localStorage.getItem(STORE_KEY);
+      if (current) {
+        const result = E.validateProject(JSON.parse(current), definitions);
+        if (!result.ok) throw new Error(result.errors.join('；'));
+        hydrate(result.data);
+        return;
       }
+      const legacy = localStorage.getItem(LEGACY_STORE_KEY);
+      if (!legacy) return;
+      const migrated = E.migrateV1(JSON.parse(legacy), HKCC.controls);
+      hydrate({
+        project: migrated.project,
+        scope: { licenses: migrated.licenses, attributes: migrated.attributes },
+        assessments: migrated.assessments,
+        unresolvedAssessments: migrated.unresolvedAssessments,
+        preferences: { merge: migrated.merge }
+      });
+      save();
+    } catch (error) {
+      state.storageAvailable = false;
     }
-    const groups = new Map();
-    for (const c of list) {
-      const k = find(c.id);
-      if (!groups.has(k)) groups.set(k, []);
-      groups.get(k).push(c);
-    }
-    // 组内排序：基线条文优先作为标题（较后期的通函多为对基线的细化），
-    // 其余按 ID 排序以保证呈现稳定。
-    return [...groups.values()].map(g => g.sort((a, b) => {
-      const pa = a.priority === 'baseline' ? 0 : 1;
-      const pb = b.priority === 'baseline' ? 0 : 1;
-      return pa - pb || a.id.localeCompare(b.id);
-    }));
   }
 
-  /* ---------- 搜索 ----------
-     同时检索当前语言的译文与基础数据，让用户用任一语言的关键词都能命中。 */
+  function assessment(id) {
+    return state.assessments[id] || {};
+  }
+
+  function updateAssessment(id, field, value) {
+    const record = { ...assessment(id) };
+    if (value == null || value === '' || (field === 'status' && value === 'none')) delete record[field];
+    else record[field] = value;
+    if (field === 'status') record.assessedAt = value === 'none' ? undefined : today();
+    for (const key of Object.keys(record)) if (record[key] == null || record[key] === '') delete record[key];
+    if (Object.keys(record).length) state.assessments[id] = record;
+    else delete state.assessments[id];
+    save();
+  }
+
+  function applies(control) {
+    return E.applies(control, state.licenses, state.attributes);
+  }
+
   function matchesQuery(group) {
     if (!state.query) return true;
-    const q = state.query.toLowerCase();
-    return group.some(c => {
-      const tc = trControl(c);
-      const src = HKCC.sources[c.sourceId];
-      const ts = trSource(c.sourceId);
-      return [c.id, c.title, c.requirement, tc.title, tc.requirement, c.quote || '', c.clause,
-              src.titleZh, src.titleEn, ts.titleZh, src.regulator]
-        .join(' ').toLowerCase().includes(q);
+    const query = state.query.toLowerCase();
+    return group.some(control => {
+      const source = HKCC.sources[control.sourceId];
+      const translated = trControl(control);
+      const translatedSource = trSource(control.sourceId);
+      const record = assessment(control.id);
+      return [control.id, control.title, control.requirement, translated.title, translated.requirement,
+        control.quote || '', control.clause, source.titleZh, source.titleEn, translatedSource.titleZh,
+        source.regulator, record.implementationNote || '',
+        record.evidenceRef || '', record.owner || ''].join(' ').toLowerCase().includes(query);
     });
   }
 
-  /* 一个合并组的自评状态以组内第一个控制点的 ID 为键 */
-  const groupKey = g => g[0].id;
-
-  /* ---------- 渲染：侧栏 ---------- */
   function renderSidebar() {
     const box = $('#sidebar');
     box.innerHTML = '';
 
-    const lg = el('div', 'field-group');
-    lg.appendChild(el('h2', null, t('secLicenses')));
-    let lastGroup = null;
-    for (const raw of HKCC.licenses) {
-      const l = trLicense(raw);
-      if (l.group !== lastGroup) {
-        lg.appendChild(el('div', 'opt-group-label', l.group));
-        lastGroup = l.group;
-      }
-      lg.appendChild(option(raw.id, l, state.licenses));
-    }
-    box.appendChild(lg);
+    const project = el('div', 'field-group project-fields');
+    project.appendChild(el('h2', null, t('secProject')));
+    project.appendChild(field(t('projectName'), 'text', state.project.name, value => {
+      state.project.name = value;
+      save();
+      updatePrintHeader();
+    }, { maxlength: 200, placeholder: t('projectNamePlaceholder') }));
+    project.appendChild(field(t('asOfDate'), 'date', state.project.asOfDate, value => {
+      state.project.asOfDate = value || today();
+      save();
+      render();
+    }));
+    box.appendChild(project);
 
-    const ag = el('div', 'field-group');
-    ag.appendChild(el('h2', null, t('secAttributes')));
-    for (const raw of HKCC.attributes) ag.appendChild(option(raw.id, trAttribute(raw), state.attributes));
-    box.appendChild(ag);
+    const licences = el('div', 'field-group');
+    licences.appendChild(el('h2', null, t('secLicenses')));
+    let lastGroup = null;
+    for (const rawLicence of HKCC.licenses) {
+      const licence = trLicense(rawLicence);
+      if (licence.group !== lastGroup) {
+        licences.appendChild(el('div', 'opt-group-label', licence.group));
+        lastGroup = licence.group;
+      }
+      licences.appendChild(option(rawLicence.id, licence, state.licenses));
+    }
+    box.appendChild(licences);
+
+    const attributes = el('div', 'field-group');
+    attributes.appendChild(el('h2', null, t('secAttributes')));
+    for (const rawAttribute of HKCC.attributes) {
+      attributes.appendChild(option(rawAttribute.id, trAttribute(rawAttribute), state.attributes));
+    }
+    box.appendChild(attributes);
+  }
+
+  function field(labelText, type, value, onChange, options) {
+    const label = el('label', 'stacked-field');
+    label.appendChild(el('span', null, labelText));
+    const input = el('input');
+    input.type = type;
+    input.value = value || '';
+    if (options?.maxlength) input.maxLength = options.maxlength;
+    if (options?.placeholder) input.placeholder = options.placeholder;
+    input.addEventListener(type === 'date' ? 'change' : 'input', event => onChange(event.target.value));
+    label.appendChild(input);
+    return label;
   }
 
   function option(id, item, set) {
@@ -149,7 +207,8 @@
     input.checked = set.has(id);
     input.addEventListener('change', () => {
       input.checked ? set.add(id) : set.delete(id);
-      save(); render();
+      save();
+      render();
     });
     const text = el('div', 'opt-text');
     text.appendChild(el('div', 'opt-label', item.label));
@@ -158,41 +217,54 @@
     return label;
   }
 
-  /* ---------- 渲染：结果 ---------- */
   function render() {
     renderSidebar();
     updatePrintHeader();
+    $('#merge').checked = state.merge;
+    $('#gaps').checked = state.gapsOnly;
+    $('#domain-filter').value = state.domain;
+
     const active = HKCC.controls.filter(applies);
-    const groups = cluster(active).filter(matchesQuery);
-    renderSummary(active, groups);
+    const allGroups = E.cluster(active, byId, state.merge);
+    let visible = allGroups.filter(matchesQuery);
+    if (state.domain) visible = visible.filter(group => group.some(c => c.domain === state.domain));
+    if (state.gapsOnly) visible = visible.filter(group => E.pendingCount(group, state.assessments) > 0);
+    visible.sort(compareGroups);
+    currentVisibleGroups = visible;
+    renderSummary(active, allGroups);
 
     const out = $('#results');
     out.innerHTML = '';
-
     if (!state.licenses.size) {
       out.appendChild(emptyState(t('emptyNoLicenseTitle'), t('emptyNoLicenseNote')));
       return;
     }
-    const visible = state.gapsOnly
-      ? groups.filter(g => { const s = state.assessment[groupKey(g)]; return s !== 'done' && s !== 'na'; })
-      : groups;
     if (!visible.length) {
       out.appendChild(emptyState(t('emptyNoMatchTitle'),
         state.gapsOnly ? t('emptyNoMatchGaps') : t('emptyNoMatchQuery')));
       return;
     }
 
-    for (const rawDomain of HKCC.domains) {
-      const inDomain = visible.filter(g => g[0].domain === rawDomain.id);
-      if (!inDomain.length) continue;
-      const d = trDomain(rawDomain);
-      const sec = el('section', 'domain');
-      const h = el('h2', null, d.label);
-      h.appendChild(el('span', 'n', t('countItems', { n: inDomain.length })));
-      sec.append(h, el('p', 'desc', d.desc));
-      for (const g of inDomain) sec.appendChild(renderControl(g));
-      out.appendChild(sec);
+    for (const domain of HKCC.domains) {
+      const groups = visible.filter(group => group[0].domain === domain.id);
+      if (!groups.length) continue;
+      const translatedDomain = trDomain(domain);
+      const section = el('section', 'domain');
+      const heading = el('h2', null, translatedDomain.label);
+      heading.appendChild(el('span', 'n', t('countItems', { n: groups.length })));
+      section.append(heading, el('p', 'desc', translatedDomain.desc));
+      for (const group of groups) section.appendChild(renderControl(group));
+      out.appendChild(section);
     }
+  }
+
+  function compareGroups(a, b) {
+    if (!state.gapsOnly) return 0;
+    const firstDate = group => group
+      .filter(c => !['done', 'na'].includes(assessment(c.id).status))
+      .map(c => assessment(c.id).targetDate || '9999-12-31')
+      .sort()[0];
+    return firstDate(a).localeCompare(firstDate(b)) || a[0].title.localeCompare(b[0].title);
   }
 
   function emptyState(title, note) {
@@ -203,299 +275,467 @@
   }
 
   function renderControl(group) {
-    const primary = trControl(group[0]);
-    const key = groupKey(group);
+    const primary = group[0];
+    const translatedPrimary = trControl(primary);
     const card = el('article', 'panel control');
-
     const head = el('div', 'control-head');
     const titleBox = el('div');
-    titleBox.appendChild(el('h3', 'control-title', primary.title));
+    titleBox.appendChild(el('h3', 'control-title', translatedPrimary.title));
     titleBox.appendChild(el('div', 'control-ids', group.map(c => c.id).join('  ·  ')));
     head.appendChild(titleBox);
-    head.appendChild(renderAssess(key));
+    const pending = E.pendingCount(group, state.assessments);
+    head.appendChild(el('span', pending ? 'tag pending' : 'tag complete',
+      pending ? t('pendingCount', { n: pending }) : t('allComplete')));
     card.appendChild(head);
 
-    card.appendChild(el('p', 'control-req', primary.requirement));
-    if (group.length > 1) {
-      for (const c of group.slice(1)) {
-        const extra = el('p', 'control-req');
-        extra.appendChild(el('strong', null,
-          t('alsoStates', { regulator: trSource(c.sourceId).regulator })));
-        extra.appendChild(document.createTextNode(' ' + trControl(c).requirement));
-        card.appendChild(extra);
-      }
+    card.appendChild(el('p', 'control-req', translatedPrimary.requirement));
+    for (const control of group.slice(1)) {
+      const extra = el('p', 'control-req');
+      extra.appendChild(el('strong', null,
+        t('alsoStates', { regulator: trSource(control.sourceId).regulator })));
+      extra.appendChild(document.createTextNode(' ' + trControl(control).requirement));
+      card.appendChild(extra);
     }
 
-    // 条文原文一律为监管机构发布的英文，任何语言下都不翻译。
+    const members = el('div', 'assessment-members');
+    for (const control of group) members.appendChild(renderMember(control));
+    card.appendChild(members);
+
     const quoted = group.filter(c => c.quote);
     if (quoted.length) {
-      const det = el('details', 'quote');
-      det.appendChild(el('summary', null, t('quoteSummary')));
-      for (const c of quoted) {
-        const bq = el('blockquote', null, c.quote);
-        bq.appendChild(el('footer', 'source-line',
-          `— ${HKCC.sources[c.sourceId].titleEn}, ${c.clause}`));
-        det.appendChild(bq);
+      const details = el('details', 'quote');
+      details.appendChild(el('summary', null, t('quoteSummary')));
+      for (const control of quoted) {
+        const label = control.quoteStatus === 'verbatim' ? t('quoteVerbatim') :
+          control.quoteStatus === 'excerpt' ? t('quoteExcerpt') : t('quoteSummaryType');
+        details.appendChild(el('div', 'quote-kind', label));
+        const quote = el('blockquote', null, control.quote);
+        quote.appendChild(el('footer', 'source-line',
+          `— ${HKCC.sources[control.sourceId].titleEn}, ${control.clause}`));
+        details.appendChild(quote);
       }
-      card.appendChild(det);
-    }
-
-    const srcBox = el('div', 'sources');
-    for (const c of group) {
-      const s = trSource(c.sourceId);
-      const line = el('div', 'source-line');
-      // 逐份出处各有自己的核验日期，悬停可见；避免与发布日期挤在同一行造成混淆。
-      if (s.verifiedOn) line.title = t('sourceMetaTip', { issued: s.issued, verified: s.verifiedOn });
-      const a = el('a', null, HKCC.sourceTitle(c.sourceId));
-      a.href = s.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      line.append(el('span', 'tag reg-' + regKey(HKCC.sources[c.sourceId].regulator), s.regulator), a,
-        el('span', 'clause', trControl(c).clause || c.clause));
-      if (s.issued && s.issued !== '—') line.appendChild(el('span', 'clause', s.issued));
-      srcBox.appendChild(line);
-    }
-    card.appendChild(srcBox);
-
-    if (primary.note) {
-      const n = el('p', 'opt-note');
-      n.style.marginTop = '9px';
-      n.textContent = t('notePrefix') + primary.note;
-      card.appendChild(n);
+      card.appendChild(details);
     }
 
     const tags = el('div', 'tags');
     if (group.length > 1) tags.appendChild(el('span', 'tag merged', t('tagMerged', { n: group.length })));
-    for (const c of group) {
-      if (c.deadline) tags.appendChild(el('span', 'tag deadline', t('tagDeadline', { date: c.deadline })));
+    const licenceIds = new Set();
+    const attributeIds = new Set();
+    for (const control of group) {
+      for (const id of control.applicability.licenses) if (state.licenses.has(id)) licenceIds.add(id);
+      for (const id of control.applicability.attributes || []) if (state.attributes.has(id)) attributeIds.add(id);
+      if (control.deadline) tags.appendChild(el('span', 'tag deadline', t('tagDeadline', { date: control.deadline })));
     }
-    const seeAlso = new Set();
-    for (const c of group) {
-      for (const r of c.crossRefs || []) {
-        if (group.some(g => g.id === r)) continue;
-        if (byId.has(r)) seeAlso.add(r);
-      }
+    for (const id of licenceIds) {
+      const item = HKCC.licenses.find(x => x.id === id);
+      if (item) tags.appendChild(el('span', 'tag', t('tagApplies', { value: trLicense(item).label })));
     }
-    for (const r of seeAlso) tags.appendChild(el('span', 'tag', t('tagSeeAlso', { id: r })));
-    const lics = new Set();
-    for (const c of group) for (const l of c.applicability.licenses) if (state.licenses.has(l)) lics.add(l);
-    for (const l of lics) {
-      const def = HKCC.licenses.find(x => x.id === l);
-      if (def) tags.appendChild(el('span', 'tag', trLicense(def).label));
+    for (const id of attributeIds) {
+      const item = HKCC.attributes.find(x => x.id === id);
+      if (item) tags.appendChild(el('span', 'tag', t('tagTriggered', { value: trAttribute(item).label })));
     }
     if (tags.childNodes.length) card.appendChild(tags);
+
+    const notes = group.flatMap(c => {
+      const translated = trControl(c);
+      return [translated.applicabilityNote || c.applicabilityNote, translated.note || c.note];
+    }).filter(Boolean);
+    for (const noteText of [...new Set(notes)]) {
+      card.appendChild(el('p', 'control-note', t('notePrefix') + noteText));
+    }
     return card;
   }
 
-  function renderAssess(key) {
+  function renderMember(control) {
+    const source = trSource(control.sourceId);
+    const translatedControl = trControl(control);
+    const record = assessment(control.id);
+    const member = el('section', 'assessment-member');
+    const top = el('div', 'member-top');
+    const sourceLine = el('div', 'source-line');
+    sourceLine.appendChild(el('span', 'tag reg-' + regKey(source.regulator), source.regulator));
+    if (source.verifiedOn) {
+      sourceLine.title = t('sourceMetaTip', { issued: source.issued, verified: source.verifiedOn });
+    }
+    const link = el('a', null, HKCC.sourceTitle(control.sourceId));
+    link.href = source.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    sourceLine.append(link, el('span', 'clause', translatedControl.clause || control.clause));
+    if (source.issued && source.issued !== '—') sourceLine.appendChild(el('span', 'clause', source.issued));
+    top.append(sourceLine, renderAssess(control.id));
+    member.appendChild(top);
+
+    const details = el('details', 'work-record');
+    if (record.implementationNote || record.evidenceRef || record.owner || record.targetDate) details.open = true;
+    const summaryText = record.implementationNote || record.evidenceRef || record.owner || record.targetDate ?
+      t('recordFilled') : t('recordEmpty');
+    details.appendChild(el('summary', null, summaryText));
+    const grid = el('div', 'record-grid');
+    grid.appendChild(recordField(control.id,
+      record.status === 'na' ? t('naReason') : t('implementationNote'), 'implementationNote', 'textarea',
+      record.implementationNote, t('implementationPlaceholder'), 10000));
+    grid.appendChild(recordField(control.id, t('evidenceRef'), 'evidenceRef', 'textarea', record.evidenceRef,
+      t('evidencePlaceholder'), 10000));
+    grid.appendChild(recordField(control.id, t('owner'), 'owner', 'text', record.owner,
+      t('ownerPlaceholder'), 200));
+    grid.appendChild(recordField(control.id, t('targetDate'), 'targetDate', 'date', record.targetDate));
+    details.appendChild(grid);
+
+    const due = E.dueState(record.targetDate, state.project.asOfDate);
+    if (due) details.appendChild(el('span', `tag ${due}`, due === 'overdue' ? t('overdue') : t('dueSoon')));
+    member.appendChild(details);
+    return member;
+  }
+
+  function renderAssess(id) {
     const box = el('div', 'assess');
-    for (const s of STATUSES) {
-      const label = t(s.key);
-      const lab = el('label', s.cls);
+    const current = assessment(id).status || 'none';
+    for (const status of STATUSES) {
+      const label = el('label', status.cls);
       const input = el('input');
       input.type = 'radio';
-      input.name = 'as-' + key;
-      input.checked = state.assessment[key] === s.id;
+      input.name = `as-${id}`;
+      input.checked = current === status.id;
       input.addEventListener('change', () => {
-        state.assessment[key] = s.id;
-        save(); renderSummaryOnly();
-        if (state.gapsOnly) render();
+        updateAssessment(id, 'status', status.id);
+        render();
       });
-      lab.append(input, document.createTextNode(label));
-      lab.title = label;
-      box.appendChild(lab);
+      const labelText = t(status.key);
+      label.append(input, document.createTextNode(labelText));
+      label.title = labelText;
+      box.appendChild(label);
     }
     return box;
   }
 
-  /* ---------- 渲染：摘要 ---------- */
-  let lastGroups = [];
-  function renderSummary(active, groups) { lastGroups = groups; renderSummaryOnly(active); }
+  function recordField(id, labelText, key, type, value, placeholder, maxlength) {
+    const label = el('label', 'record-field');
+    label.appendChild(el('span', null, labelText));
+    const input = el(type === 'textarea' ? 'textarea' : 'input');
+    if (type !== 'textarea') input.type = type;
+    input.value = value || '';
+    if (placeholder) input.placeholder = placeholder;
+    if (maxlength) input.maxLength = maxlength;
+    input.addEventListener(type === 'date' ? 'change' : 'input', event => {
+      updateAssessment(id, key, event.target.value);
+      if (type === 'date') render();
+    });
+    label.appendChild(input);
+    return label;
+  }
 
-  function renderSummaryOnly(activeIn) {
-    const active = activeIn || HKCC.controls.filter(applies);
+  function renderSummary(active, groups) {
     const box = $('#summary');
     box.innerHTML = '';
-
     const top = el('div', 'summary-top');
-    top.appendChild(el('span', 'summary-count', String(lastGroups.length)));
+    top.appendChild(el('span', 'summary-count', String(groups.length)));
     top.appendChild(el('span', 'summary-label', t('summaryLabel')));
     box.appendChild(top);
+    const merged = active.length - groups.length;
+    box.appendChild(el('div', 'summary-note', merged > 0 ?
+      t('summaryFromMerged', { total: active.length, merged }) :
+      t('summaryFrom', { total: active.length })));
 
-    const merged = active.length - lastGroups.length;
-    box.appendChild(el('div', 'summary-note',
-      merged > 0
-        ? t('summaryFromMerged', { total: active.length, merged })
-        : t('summaryFrom', { total: active.length })));
+    if (!state.storageAvailable) {
+      box.appendChild(el('div', 'storage-warning', t('storageWarning')));
+    }
+    if (Object.keys(state.unresolvedAssessments).length) {
+      box.appendChild(el('div', 'storage-warning',
+        t('unresolvedWarning', { n: Object.keys(state.unresolvedAssessments).length })));
+    }
 
     const counts = {};
-    for (const c of active) {
-      const r = trSource(c.sourceId).regulator;
-      counts[r] = (counts[r] || 0) + 1;
+    for (const control of active) {
+      const regulator = trSource(control.sourceId).regulator;
+      counts[regulator] = (counts[regulator] || 0) + 1;
     }
-    const reg = el('div', 'by-reg');
-    for (const [r, n] of Object.entries(counts).sort((a, b) => b[1] - a[1])) {
-      reg.appendChild(el('span', 'tag reg-' + regKey(r), `${r} ${n}`));
+    const regulators = el('div', 'by-reg');
+    for (const [regulator, count] of Object.entries(counts).sort((a, b) => b[1] - a[1])) {
+      regulators.appendChild(el('span', 'tag reg-' + regKey(regulator), `${regulator} ${count}`));
     }
-    if (reg.childNodes.length) box.appendChild(reg);
+    if (regulators.childNodes.length) box.appendChild(regulators);
 
-    if (lastGroups.length) {
+    if (active.length) {
       const tally = { done: 0, partial: 0, gap: 0, na: 0, none: 0 };
-      for (const g of lastGroups) tally[state.assessment[groupKey(g)] || 'none']++;
-      const scored = lastGroups.length - tally.na;
+      for (const control of active) tally[assessment(control.id).status || 'none']++;
+      const scored = active.length - tally.na;
       const pct = scored ? Math.round(((tally.done + tally.partial * 0.5) / scored) * 100) : 0;
-
       const wrap = el('div', 'progress-wrap');
-      const head = el('div', 'progress-head');
-      head.appendChild(el('span', null, t('progressLabel', { pct })));
-      head.appendChild(el('span', null, t('progressTally', {
+      const progressHead = el('div', 'progress-head');
+      progressHead.appendChild(el('span', null, t('progressLabel', { pct })));
+      progressHead.appendChild(el('span', null, t('progressTally', {
         done: tally.done, partial: tally.partial, gap: tally.gap, none: tally.none
       })));
       const bar = el('div', 'progress');
-      const seg = (cls, n) => {
-        if (!n) return;
-        const i = el('i', cls);
-        i.style.width = (n / lastGroups.length * 100) + '%';
-        bar.appendChild(i);
-      };
-      seg('done', tally.done); seg('partial', tally.partial); seg('gap', tally.gap);
-      wrap.append(head, bar);
+      for (const [cls, count] of [['done', tally.done], ['partial', tally.partial], ['gap', tally.gap]]) {
+        if (!count) continue;
+        const segment = el('i', cls);
+        segment.style.width = `${count / active.length * 100}%`;
+        bar.appendChild(segment);
+      }
+      wrap.append(progressHead, bar,
+        el('div', 'score-note', t('progressDisclaimer')));
       box.appendChild(wrap);
     }
   }
 
-  /* ---------- 导出 ---------- */
-  function toCSV() {
-    const cell = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-    const rows = [[t('csvId'), t('csvDomain'), t('csvTitle'), t('csvRequirement'),
-      t('csvRegulator'), t('csvSource'), t('csvClause'), t('csvIssued'), t('csvVerified'),
-      t('csvDeadline'), t('csvUrl'), t('csvQuote'), t('csvStatus')]];
-    const statusLabel = id => {
-      const s = STATUSES.find(x => x.id === id);
-      return s ? t(s.key) : t('statusUnrated');
-    };
-    for (const g of lastGroups) {
-      const status = statusLabel(state.assessment[groupKey(g)]);
-      for (const raw of g) {
-        const c = trControl(raw);
-        const s = trSource(raw.sourceId);
-        const dRaw = HKCC.domains.find(x => x.id === raw.domain);
-        const d = dRaw ? trDomain(dRaw) : null;
-        rows.push([raw.id, d ? d.label : raw.domain, c.title, c.requirement, s.regulator,
-          HKCC.sourceTitle(raw.sourceId), c.clause || raw.clause, s.issued, s.verifiedOn || '',
-          raw.deadline || '', s.url, raw.quote || '', status]);
-      }
-    }
-    // BOM：让 Excel 正确识别 UTF-8 中文
-    return '﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n');
+  let currentVisibleGroups = [];
+  function statusLabel(status) {
+    const item = STATUSES.find(entry => entry.id === (status || 'none')) || STATUSES[0];
+    return t(item.key);
   }
 
-  function download(name, text, mime) {
-    const blob = new Blob([text], { type: mime });
+  function applicabilityText(control) {
+    const licences = control.applicability.licenses
+      .filter(id => state.licenses.has(id))
+      .map(id => {
+        const item = HKCC.licenses.find(entry => entry.id === id);
+        return item ? trLicense(item).label : null;
+      })
+      .filter(Boolean);
+    const attributes = (control.applicability.attributes || [])
+      .map(id => {
+        const item = HKCC.attributes.find(entry => entry.id === id);
+        return item ? trAttribute(item).label : null;
+      })
+      .filter(Boolean);
+    return [...licences, ...attributes].join(HKCC.locale === 'en' ? '; ' : '；');
+  }
+
+  function toCSV() {
+    const rows = [[t('csvProjectName'), t('csvAsOfDate'), t('csvId'), t('csvDomain'), t('csvTitle'),
+      t('csvRequirement'), t('csvApplicability'), t('csvRegulator'), t('csvSource'), t('csvClause'),
+      t('csvIssued'), t('csvVerified'), t('csvDeadline'), t('csvUrl'), t('csvQuoteType'), t('csvQuote'),
+      t('csvStatus'), t('csvImplementation'), t('csvEvidence'), t('csvOwner'), t('csvTargetDate'),
+      t('csvDueState')]];
+    for (const group of currentVisibleGroups) {
+      for (const control of group) {
+        if (state.gapsOnly && ['done', 'na'].includes(assessment(control.id).status)) continue;
+        const source = trSource(control.sourceId);
+        const translatedControl = trControl(control);
+        const rawDomain = HKCC.domains.find(item => item.id === control.domain);
+        const domain = rawDomain ? trDomain(rawDomain) : null;
+        const record = assessment(control.id);
+        const due = E.dueState(record.targetDate, state.project.asOfDate);
+        const quoteType = control.quoteStatus === 'verbatim' ? t('quoteVerbatim') :
+          control.quoteStatus === 'excerpt' ? t('quoteExcerpt') : control.quote ? t('quoteSummaryType') : '';
+        rows.push([state.project.name, state.project.asOfDate, control.id, domain?.label || control.domain,
+          translatedControl.title, translatedControl.requirement, applicabilityText(control), source.regulator,
+          HKCC.sourceTitle(control.sourceId), translatedControl.clause || control.clause, source.issued,
+          source.verifiedOn || '', control.deadline || '', source.url, quoteType, control.quote || '',
+          statusLabel(record.status), record.implementationNote || '', record.evidenceRef || '', record.owner || '',
+          record.targetDate || '', due === 'overdue' ? t('overdue') : due === 'due-soon' ? t('dueSoon') : '']);
+      }
+    }
+    return '\ufeff' + rows.map(row => row.map(E.csvCell).join(',')).join('\r\n');
+  }
+
+  function download(name, content, mime) {
+    const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = name;
-    document.body.appendChild(a); a.click(); a.remove();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  /* ---------- 打印抬头 ---------- */
+  function safeFileName(value) {
+    return (value || 'hk-compliance').trim().replace(/[^\p{L}\p{N}._-]+/gu, '-').slice(0, 80) || 'hk-compliance';
+  }
+
+  function exportProject() {
+    const data = projectData(true);
+    download(`${safeFileName(state.project.name)}-${today()}.hkcc.json`, JSON.stringify(data, null, 2),
+      'application/json;charset=utf-8');
+  }
+
+  async function importProject(file) {
+    if (!file) return;
+    if (file.size > MAX_PROJECT_BYTES) {
+      alert(t('importTooLarge'));
+      return;
+    }
+    let parsed;
+    try {
+      parsed = JSON.parse(await file.text());
+    } catch (error) {
+      alert(t('importInvalidJson'));
+      return;
+    }
+    const result = E.validateProject(parsed, definitions);
+    if (!result.ok) {
+      alert(t('importValidationFailed', { errors: result.errors.slice(0, 12).join('\n') }));
+      return;
+    }
+    const data = result.data;
+    const known = Object.keys(data.assessments).length;
+    const unresolved = Object.keys(data.unresolvedAssessments).length;
+    const versionNote = data.controlDataVersion && data.controlDataVersion !== HKCC.meta.version ?
+      t('importVersionDifferent', { imported: data.controlDataVersion, current: HKCC.meta.version }) :
+      t('importVersion', { version: data.controlDataVersion || t('notRecorded') });
+    const warningText = result.warnings.length ?
+      t('importWarnings', { warnings: result.warnings.slice(0, 8).join('\n') }) : '';
+    const confirmed = confirm(t('confirmImport', {
+      name: data.project.name || t('unnamedProject'),
+      exportedAt: data.exportedAt || t('notRecorded'),
+      versionNote,
+      known,
+      unresolved,
+      warningText
+    }));
+    if (!confirmed) return;
+    hydrate(data);
+    save();
+    render();
+  }
+
   function updatePrintHeader() {
-    const sep = HKCC.locale === 'en' ? '; ' : '；';
-    const lics = [...state.licenses]
+    const separator = HKCC.locale === 'en' ? '; ' : '；';
+    const licences = [...state.licenses]
       .map(id => {
-        const def = HKCC.licenses.find(l => l.id === id);
-        return def ? trLicense(def).label : null;
+        const item = HKCC.licenses.find(entry => entry.id === id);
+        return item ? trLicense(item).label : null;
       }).filter(Boolean);
-    const attrs = [...state.attributes]
+    const attributes = [...state.attributes]
       .map(id => {
-        const def = HKCC.attributes.find(a => a.id === id);
-        return def ? trAttribute(def).label : null;
+        const item = HKCC.attributes.find(entry => entry.id === id);
+        return item ? trAttribute(item).label : null;
       }).filter(Boolean);
     $('#ph-title').textContent = t('printTitle');
-    $('#ph-scope').textContent = t('phScope') + (lics.join(sep) || t('phNone'));
-    $('#ph-attrs').textContent = t('phAttrs') + (attrs.join(sep) || t('phNone'));
-    $('#ph-date').textContent = t('phDate', {
-      today: new Date().toISOString().slice(0, 10), verified: HKCC.verifiedOn()
+    $('#ph-project').textContent = t('phProject', { name: state.project.name || t('unnamedProject') });
+    $('#ph-scope').textContent = t('phScope') + (licences.join(separator) || t('phNone'));
+    $('#ph-attrs').textContent = t('phAttrs') + (attributes.join(separator) || t('phNone'));
+    $('#ph-date').textContent = t('phAssessmentDate', {
+      date: state.project.asOfDate || today(), version: HKCC.meta.version, verified: HKCC.verifiedOn()
     });
   }
 
-  /* ---------- 静态界面文字 ----------
-     切换语言时一并刷新，避免只更新了结果区而按钮仍是旧语言。 */
+  function renderDomainOptions() {
+    const select = $('#domain-filter');
+    select.innerHTML = '';
+    const all = el('option', null, t('allDomains'));
+    all.value = '';
+    select.appendChild(all);
+    for (const domain of HKCC.domains) {
+      const option = el('option', null, trDomain(domain).label);
+      option.value = domain.id;
+      select.appendChild(option);
+    }
+    select.value = state.domain;
+    select.setAttribute('aria-label', t('domainFilterAria'));
+  }
+
   function renderChrome() {
     $('#app-title').textContent = t('appTitle');
-    $('#export').textContent = t('btnExport');
+    $('#export-project').textContent = t('btnExportProject');
+    $('#import-project').textContent = t('btnImportProject');
+    $('#export-csv').textContent = t('btnExport');
     $('#print').textContent = t('btnPrint');
     $('#reset').textContent = t('btnReset');
     const theme = $('#theme');
     theme.textContent = t('btnTheme');
     theme.title = t('btnThemeTitle');
-    const q = $('#q');
-    q.placeholder = t('searchPlaceholder');
-    q.setAttribute('aria-label', t('searchAria'));
+    const query = $('#q');
+    query.placeholder = t('searchPlaceholder');
+    query.setAttribute('aria-label', t('searchAria'));
     $('#merge-label').textContent = t('optMerge');
     $('#gaps-label').textContent = t('optGaps');
-    $('#version').textContent =
-      t('versionLine', { version: HKCC.meta.version, date: HKCC.verifiedOn() });
-    // 各出处核验日期不一致时，页首显示最早的一个，并在悬停时说明区间。
-    $('#version').title = HKCC.verifiedOn() === HKCC.lastVerifiedOn()
-      ? '' : t('verifiedRangeTip', { from: HKCC.verifiedOn(), to: HKCC.lastVerifiedOn() });
+    $('#version').textContent = t('versionLine', { version: HKCC.meta.version, date: HKCC.verifiedOn() });
+    $('#version').title = HKCC.verifiedOn() === HKCC.lastVerifiedOn() ? '' :
+      t('verifiedRangeTip', { from: HKCC.verifiedOn(), to: HKCC.lastVerifiedOn() });
 
-    const foot = $('#disclaimer');
-    foot.innerHTML = '';
-    const p1 = el('p');
-    p1.append(el('strong', null, t('disclaimerLabel')), document.createTextNode(t('disclaimerBody')));
-    const p2 = el('p');
-    p2.append(el('strong', null, t('langNoteLabel')), document.createTextNode(t('langNoteBody')));
-    foot.append(p1, p2);
+    const footer = $('#disclaimer');
+    footer.innerHTML = '';
+    const first = el('p');
+    first.append(el('strong', null, t('disclaimerLabel')), document.createTextNode(t('disclaimerBody')));
+    const second = el('p');
+    second.append(el('strong', null, t('langNoteLabel')), document.createTextNode(t('langNoteBody')));
+    footer.append(first, second);
 
-    for (const btn of document.querySelectorAll('#lang [data-lang]')) {
-      const on = btn.dataset.lang === HKCC.locale;
-      btn.classList.toggle('on', on);
-      btn.setAttribute('aria-pressed', String(on));
+    for (const button of document.querySelectorAll('#lang [data-lang]')) {
+      const selected = button.dataset.lang === HKCC.locale;
+      button.classList.toggle('on', selected);
+      button.setAttribute('aria-pressed', String(selected));
     }
     $('#lang').setAttribute('aria-label', t('langLabel'));
+    renderDomainOptions();
   }
 
-  function renderAll() { renderChrome(); render(); }
+  function renderAll() {
+    renderChrome();
+    render();
+  }
 
-  /* ---------- 初始化 ---------- */
   function init() {
     load();
     HKCC.applyDocumentLocale();
-
-    $('#q').addEventListener('input', e => { state.query = e.target.value.trim(); render(); });
-    const mergeBox = $('#merge');
-    mergeBox.checked = state.merge;
-    mergeBox.addEventListener('change', e => { state.merge = e.target.checked; save(); render(); });
-    $('#gaps').addEventListener('change', e => { state.gapsOnly = e.target.checked; render(); });
-    $('#export').addEventListener('click', () =>
-      download(`hk-compliance-${HKCC.locale}-${new Date().toISOString().slice(0, 10)}.csv`,
-        toCSV(), 'text/csv;charset=utf-8'));
-    $('#print').addEventListener('click', () => { updatePrintHeader(); window.print(); });
+    const domainFilter = $('#domain-filter');
+    $('#q').addEventListener('input', event => {
+      state.query = event.target.value.trim();
+      render();
+    });
+    $('#merge').addEventListener('change', event => {
+      state.merge = event.target.checked;
+      save();
+      render();
+    });
+    $('#gaps').addEventListener('change', event => {
+      state.gapsOnly = event.target.checked;
+      render();
+    });
+    domainFilter.addEventListener('change', event => {
+      state.domain = event.target.value;
+      render();
+    });
+    $('#export-csv').addEventListener('click', () =>
+      download(`${safeFileName(state.project.name)}-${today()}.csv`, toCSV(), 'text/csv;charset=utf-8'));
+    $('#export-project').addEventListener('click', exportProject);
+    const importInput = $('#import-file');
+    $('#import-project').addEventListener('click', () => importInput.click());
+    importInput.addEventListener('change', async event => {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+      await importProject(file);
+    });
+    $('#print').addEventListener('click', () => {
+      updatePrintHeader();
+      window.print();
+    });
     $('#reset').addEventListener('click', () => {
       if (!confirm(t('confirmReset'))) return;
-      state.licenses.clear(); state.attributes.clear();
-      state.assessment = {}; state.query = ''; state.gapsOnly = false;
-      $('#q').value = ''; $('#gaps').checked = false;
-      save(); render();
+      state.project = { name: '', asOfDate: today() };
+      state.licenses.clear();
+      state.attributes.clear();
+      state.assessments = Object.create(null);
+      state.unresolvedAssessments = Object.create(null);
+      state.query = '';
+      state.domain = '';
+      state.gapsOnly = false;
+      $('#q').value = '';
+      save();
+      render();
     });
     $('#theme').addEventListener('click', () => {
-      const cur = document.documentElement.getAttribute('data-theme');
-      const next = cur === 'dark' ? 'light' : cur === 'light' ? '' : 'dark';
-      next ? document.documentElement.setAttribute('data-theme', next)
-           : document.documentElement.removeAttribute('data-theme');
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : current === 'light' ? '' : 'dark';
+      if (next) document.documentElement.setAttribute('data-theme', next);
+      else document.documentElement.removeAttribute('data-theme');
     });
 
-    const lang = $('#lang');
-    for (const def of HKCC.locales) {
-      const b = el('button', 'lang-btn', def.label);
-      b.type = 'button';
-      b.dataset.lang = def.id;
-      b.lang = def.html;
-      b.addEventListener('click', () => HKCC.setLocale(def.id));
-      lang.appendChild(b);
+    const language = $('#lang');
+    for (const definition of HKCC.locales) {
+      const button = el('button', 'lang-btn', definition.label);
+      button.type = 'button';
+      button.dataset.lang = definition.id;
+      button.lang = definition.html;
+      button.addEventListener('click', () => HKCC.setLocale(definition.id));
+      language.appendChild(button);
     }
     document.addEventListener('hkcc:localechange', renderAll);
-
     renderAll();
   }
 
