@@ -16,18 +16,18 @@ jobs:
     name: 数据校验与生成物同步
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
 
       # ID 唯一、出处存在、交叉引用可解析、必填字段齐全、
       # 每份出处有 verifiedOn、英文与繁体层无漏译。
       - name: node tools/validate.mjs
         run: node tools/validate.mjs
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 

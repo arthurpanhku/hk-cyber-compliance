@@ -42,6 +42,26 @@ node tools/check-links.mjs
 5xx 与超时多为暂时性故障，只报告。**发现链接失效时，请到监管机构官网找回新地址，
 并同步推进该出处的 `verifiedOn`。**
 
+## 连不上监管机构网站时
+
+撰写控制点必须逐字对照官方原文，但受限的开发环境（容器、代理、公司网络）
+常把 `www.sfc.hk`、`brdr.hkma.gov.hk`、`occics.gov.hk` 整域拦掉。
+GitHub Actions 的 runner 没有这个限制，所以取文这一步可以放到 CI 里跑：
+
+**Actions → 取回条文原文 → Run workflow**，填入出处 ID（与 `data/sources.js` 一致），
+PDF 可另填页码范围如 `1-20`。本地同样可用：
+
+```bash
+node tools/fetch-source.mjs sfc-vatp-guidelines 1-20
+```
+
+原文会转成纯文本，同时写进作业日志（不需额外出网即可阅读）与构建产物
+`source-text`（完整全文，保留 14 天）。只接受 `data/sources.js` 里已登记的出处 ID，
+不接受任意 URL——它是取官方原文的工具，不是通用抓取代理。
+
+**取回的原文不要提交进仓库**（`out/` 已在 `.gitignore` 中）。版权属于各监管机构，
+本项目只以结构化形式引述条文并链接官方出处。
+
 若改动过任何中文文字，还须重新生成繁体层：
 
 ```bash
